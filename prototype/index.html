@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>팀 업무 관리</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif; background: #f0f2f5; }
+
+    /* ── 로그인 ── */
+    .login-screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100vh; background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    .login-screen h1 { color: #fff; font-size: 32px; margin-bottom: 8px; }
+    .login-screen p { color: rgba(255,255,255,0.8); margin-bottom: 36px; font-size: 16px; }
+    .login-cards { display: flex; gap: 20px; }
+    .login-card {
+      background: #fff; border-radius: 16px; padding: 36px 44px;
+      text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .login-card:hover { transform: translateY(-6px); box-shadow: 0 12px 32px rgba(0,0,0,0.2); }
+    .avatar {
+      width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px; color: #fff; font-weight: bold;
+    }
+    .login-card .name { font-size: 20px; font-weight: 600; color: #333; }
+    .login-card .role { font-size: 13px; color: #999; margin-top: 4px; }
+    .av-jiwon { background: #667eea; }
+    .av-soyoung { background: #f093fb; }
+    .av-seulgi { background: #4facfe; }
+
+    /* ── 앱 레이아웃 ── */
+    .app { display: none; min-height: 100vh; padding-bottom: 70px; }
+    .header {
+      background: #fff; padding: 12px 24px; display: flex; align-items: center;
+      justify-content: space-between; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      position: sticky; top: 0; z-index: 50;
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .avatar-sm {
+      width: 34px; height: 34px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 13px;
+    }
+    .header h2 { font-size: 17px; color: #333; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .notif-btn {
+      position: relative; background: none; border: none; font-size: 20px;
+      cursor: pointer; padding: 4px 8px;
+    }
+    .notif-badge {
+      position: absolute; top: -2px; right: 0; background: #dc2626; color: #fff;
+      font-size: 10px; width: 18px; height: 18px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-weight: bold;
+    }
+    .logout-btn {
+      background: none; border: 1px solid #ddd; padding: 5px 12px;
+      border-radius: 8px; cursor: pointer; color: #666; font-size: 12px;
+    }
+
+    /* ── 하단 네비게이션 ── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; background: #fff;
+      display: flex; justify-content: space-around; align-items: center;
+      height: 64px; box-shadow: 0 -2px 10px rgba(0,0,0,0.06); z-index: 50;
+      border-top: 1px solid #eee;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      cursor: pointer; padding: 6px 12px; border-radius: 12px; transition: all 0.2s;
+      color: #999; font-size: 10px; font-weight: 500; min-width: 56px;
+    }
+    .nav-item:hover { color: #667eea; }
+    .nav-item.active { color: #667eea; }
+    .nav-item .nav-icon { font-size: 22px; }
+    .nav-item.nav-add { position: relative; top: -14px; }
+    .nav-add-btn {
+      width: 52px; height: 52px; border-radius: 50%; background: #667eea;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; color: #fff; box-shadow: 0 4px 14px rgba(102,126,234,0.4);
+    }
+
+    /* ── 컨텐츠 ── */
+    .content { max-width: 1100px; margin: 16px auto; padding: 0 16px; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── 대시보드 ── */
+    .dash-welcome { font-size: 20px; font-weight: 700; color: #333; margin-bottom: 16px; }
+    .dash-welcome span { color: #667eea; }
+    .dash-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .dash-card {
+      background: #fff; border-radius: 14px; padding: 16px 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05); text-align: center;
+    }
+    .dash-card .num { font-size: 30px; font-weight: 800; }
+    .dash-card .label { font-size: 12px; color: #999; }
+    .num-urgent { color: #dc2626; } .num-progress { color: #f59e0b; }
+    .num-today { color: #667eea; } .num-done { color: #22c55e; }
+    .dash-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .dash-section { margin-bottom: 20px; }
+    .dash-section-title { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 10px; }
+    .today-task {
+      background: #fff; border-radius: 10px; padding: 12px 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 10px;
+      margin-bottom: 6px; border-left: 4px solid transparent;
+    }
+    .today-task.urgent { border-left-color: #dc2626; }
+    .today-task.normal { border-left-color: #667eea; }
+    .today-task .tt-title { font-size: 13px; font-weight: 500; color: #333; flex: 1; }
+    .today-task .tt-deadline { font-size: 11px; color: #f59e0b; white-space: nowrap; }
+    .today-task .tt-deadline.overdue { color: #dc2626; font-weight: 600; }
+    .team-member-row {
+      background: #fff; border-radius: 10px; padding: 12px 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 10px;
+      margin-bottom: 6px;
+    }
+    .avatar-xs {
+      width: 28px; height: 28px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 11px;
+      flex-shrink: 0;
+    }
+    .tm-name { font-size: 13px; font-weight: 600; color: #333; width: 40px; }
+    .tm-bar { flex: 1; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
+    .tm-bar-fill { height: 100%; border-radius: 4px; }
+    .tm-count { font-size: 11px; color: #999; white-space: nowrap; }
+
+    /* ── 검색/필터 ── */
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+    .search-input {
+      padding: 9px 14px; border: 1.5px solid #e0e0e0; border-radius: 10px;
+      font-size: 14px; outline: none; flex: 1; min-width: 150px;
+    }
+    .search-input:focus { border-color: #667eea; }
+    .filter-chip {
+      padding: 6px 14px; border: 1.5px solid #ddd; border-radius: 20px;
+      font-size: 12px; cursor: pointer; background: #fff; user-select: none;
+    }
+    .filter-chip.active { border-color: #667eea; background: #e0e7ff; color: #667eea; font-weight: 600; }
+
+    /* ── 업무 카드 ── */
+    .category { margin-bottom: 20px; }
+    .category-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .cat-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .badge-urgent { background: #fee2e2; color: #dc2626; }
+    .badge-normal { background: #e0e7ff; color: #4f46e5; }
+    .cat-count { font-size: 12px; color: #bbb; }
+
+    .task-card {
+      background: #fff; border-radius: 12px; padding: 14px 16px;
+      margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      display: flex; align-items: flex-start; gap: 10px; cursor: pointer;
+      border-left: 4px solid transparent; transition: all 0.15s;
+    }
+    .task-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .task-card.urgent-border { border-left-color: #dc2626; }
+    .task-card.normal-border { border-left-color: #667eea; }
+    .task-check {
+      width: 22px; height: 22px; border: 2px solid #ddd; border-radius: 50%;
+      flex-shrink: 0; margin-top: 1px; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .task-check:hover { border-color: #22c55e; }
+    .task-check.checked { background: #22c55e; border-color: #22c55e; }
+    .task-check.checked::after { content: '✓'; color: #fff; font-size: 12px; font-weight: bold; }
+    .task-info { flex: 1; min-width: 0; }
+    .task-title { font-size: 14px; color: #333; font-weight: 500; }
+    .task-card.checked-card .task-title { text-decoration: line-through; color: #bbb; }
+    .task-meta { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+    .meta-tag { font-size: 11px; padding: 2px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+    .tag-deadline { background: #fef3c7; color: #d97706; }
+    .tag-overdue { background: #fee2e2; color: #dc2626; font-weight: 600; }
+    .tag-assignee { background: #f3f4f6; color: #666; }
+    .tag-memo { background: #ede9fe; color: #7c3aed; }
+    .tag-status { background: #dbeafe; color: #2563eb; }
+
+    /* ── 칸반 ── */
+    .kanban { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .kanban-col { background: #f5f5f5; border-radius: 14px; padding: 14px; min-height: 300px; }
+    .kanban-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #ddd; }
+    .kanban-title { font-size: 14px; font-weight: 700; }
+    .kanban-count { background: #e0e7ff; color: #667eea; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 12px; }
+    .kanban-header.todo-h { border-bottom-color: #94a3b8; }
+    .kanban-header.progress-h { border-bottom-color: #f59e0b; }
+    .kanban-header.done-h { border-bottom-color: #22c55e; }
+    .kanban-card {
+      background: #fff; border-radius: 10px; padding: 12px; margin-bottom: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06); cursor: grab; transition: all 0.15s;
+    }
+    .kanban-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
+    .kanban-card.dragging { opacity: 0.4; }
+    .kc-title { font-size: 13px; font-weight: 500; color: #333; margin-bottom: 6px; }
+    .kc-meta { display: flex; gap: 6px; flex-wrap: wrap; }
+    .kc-priority { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
+    .kc-p-urgent { background: #fee2e2; color: #dc2626; }
+    .kc-p-normal { background: #e0e7ff; color: #4f46e5; }
+    .kc-deadline { font-size: 11px; color: #999; }
+    .kc-assignees { display: flex; margin-top: 6px; }
+    .kc-av { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; font-weight: bold; margin-right: -4px; border: 2px solid #fff; }
+    .drag-hint { text-align: center; color: #ddd; font-size: 12px; padding: 16px; }
+
+    /* ── 팀 업무 ── */
+    .team-filter { display: flex; gap: 8px; margin-bottom: 14px; }
+    .team-chip { padding: 7px 16px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 500; border: 2px solid #eee; background: #fff; }
+    .team-chip.active { color: #fff; border-color: transparent; }
+    .team-chip.tc-all.active { background: #667eea; }
+    .team-chip.tc-jiwon.active { background: #667eea; }
+    .team-chip.tc-soyoung.active { background: #f093fb; }
+    .team-chip.tc-seulgi.active { background: #4facfe; }
+
+    /* ── 캘린더 ── */
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .cal-nav { display: flex; align-items: center; gap: 14px; }
+    .cal-nav-btn { background: #fff; border: 1px solid #ddd; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+    .cal-nav-btn:hover { background: #f0f0f0; }
+    .cal-month { font-size: 20px; font-weight: 700; color: #333; min-width: 130px; text-align: center; }
+    .cal-legend { display: flex; gap: 12px; font-size: 12px; color: #999; }
+    .cal-legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+
+    .calendar { background: #fff; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; }
+    .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); background: #f9fafb; }
+    .cal-weekday { text-align: center; padding: 10px; font-size: 12px; font-weight: 700; color: #999; }
+    .cal-weekday:first-child { color: #dc2626; }
+    .cal-weekday:last-child { color: #2563eb; }
+    .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); }
+    .cal-day {
+      min-height: 90px; padding: 6px 8px; border-top: 1px solid #f0f0f0;
+      border-right: 1px solid #f0f0f0; cursor: pointer; transition: background 0.15s;
+      position: relative;
+    }
+    .cal-day:hover { background: #f9fafb; }
+    .cal-day:nth-child(7n) { border-right: none; }
+    .cal-day.other-month { background: #fafafa; }
+    .cal-day.other-month .day-num { color: #ddd; }
+    .cal-day.today { background: #f0f4ff; }
+    .cal-day.today .day-num { background: #667eea; color: #fff; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
+    .day-num { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .cal-day:nth-child(7n+1) .day-num { color: #dc2626; }
+    .cal-day:nth-child(7n) .day-num { color: #2563eb; }
+    .cal-event {
+      font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-bottom: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+    }
+    .cal-event.ev-urgent { background: #fee2e2; color: #dc2626; }
+    .cal-event.ev-normal { background: #e0e7ff; color: #4f46e5; }
+    .cal-event.ev-done { background: #dcfce7; color: #16a34a; text-decoration: line-through; }
+    .cal-more { font-size: 10px; color: #999; padding: 2px 0; cursor: pointer; }
+    .cal-more:hover { color: #667eea; }
+
+    .cal-selected-day {
+      background: #fff; border-radius: 14px; padding: 18px; margin-top: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .cal-sel-title { font-size: 16px; font-weight: 700; color: #333; margin-bottom: 12px; }
+    .cal-sel-task {
+      display: flex; align-items: center; gap: 10px; padding: 10px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .cal-sel-task:last-child { border-bottom: none; }
+    .cst-priority { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .cst-urgent { background: #dc2626; }
+    .cst-normal { background: #4f46e5; }
+    .cst-title { font-size: 14px; color: #333; flex: 1; }
+    .cst-assignee { font-size: 12px; color: #999; }
+
+    /* ── 월별 조회 ── */
+    .month-selector { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+    .month-nav { background: #fff; border: 1px solid #ddd; width: 38px; height: 38px; border-radius: 10px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+    .month-label { font-size: 20px; font-weight: 700; color: #333; min-width: 130px; text-align: center; }
+    .month-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); text-align: center; }
+    .stat-number { font-size: 30px; font-weight: 800; }
+    .stat-label { font-size: 12px; color: #999; margin-top: 2px; }
+    .completed-task { background: #fff; border-radius: 10px; padding: 12px 16px; margin-bottom: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 10px; }
+    .ct-check { color: #22c55e; font-size: 16px; font-weight: bold; }
+    .ct-title { font-size: 13px; color: #999; text-decoration: line-through; flex: 1; }
+    .ct-who { font-size: 11px; color: #bbb; }
+    .ct-date { font-size: 11px; color: #bbb; }
+
+    /* ── 알림 패널 ── */
+    .notif-panel {
+      display: none; position: fixed; top: 52px; right: 16px; width: 320px;
+      background: #fff; border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      z-index: 100; overflow: hidden;
+    }
+    .notif-panel.show { display: block; }
+    .notif-header { padding: 14px 16px; font-size: 15px; font-weight: 700; border-bottom: 1px solid #eee; }
+    .notif-item { padding: 10px 16px; border-bottom: 1px solid #f5f5f5; cursor: pointer; }
+    .notif-item:hover { background: #f9fafb; }
+    .notif-item.unread { background: #f0f4ff; }
+    .notif-text { font-size: 13px; color: #333; }
+    .notif-time { font-size: 11px; color: #bbb; margin-top: 3px; }
+
+    /* ── 모달 ── */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #fff; border-radius: 16px; padding: 24px; width: 500px;
+      max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal h3 { font-size: 18px; margin-bottom: 18px; color: #333; }
+    .modal label { font-size: 12px; color: #888; display: block; margin-bottom: 5px; margin-top: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .modal input[type="text"], .modal input[type="date"], .modal textarea {
+      width: 100%; padding: 10px 12px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 14px; outline: none; font-family: inherit;
+    }
+    .modal input:focus, .modal textarea:focus { border-color: #667eea; }
+    .modal textarea { resize: vertical; min-height: 70px; }
+    .modal-btns { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+    .btn-cancel { padding: 10px 20px; border: 1px solid #ddd; background: #fff; border-radius: 10px; cursor: pointer; font-size: 14px; color: #666; }
+    .btn-delete { padding: 10px 20px; border: none; background: #fee2e2; color: #dc2626; border-radius: 10px; cursor: pointer; font-size: 14px; margin-right: auto; }
+    .btn-submit { padding: 10px 20px; border: none; background: #667eea; color: #fff; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; }
+    .btn-submit:hover { background: #5a6fd6; }
+    .priority-selector, .status-selector { display: flex; gap: 8px; margin-top: 4px; }
+    .priority-option, .status-option { padding: 9px 20px; border: 2px solid #eee; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; }
+    .priority-option.sel-urgent { border-color: #dc2626; background: #fee2e2; color: #dc2626; }
+    .priority-option.sel-normal { border-color: #4f46e5; background: #e0e7ff; color: #4f46e5; }
+    .status-option.sel-todo { border-color: #94a3b8; background: #f1f5f9; color: #475569; }
+    .status-option.sel-progress { border-color: #f59e0b; background: #fef3c7; color: #d97706; }
+    .status-option.sel-done { border-color: #22c55e; background: #dcfce7; color: #16a34a; }
+    .assignee-chips { display: flex; gap: 8px; margin-top: 4px; }
+    .assignee-chip { padding: 8px 16px; border: 2px solid #eee; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 500; }
+    .assignee-chip.selected { border-color: #667eea; background: #e0e7ff; color: #667eea; }
+    .detail-row { margin-top: 12px; }
+    .detail-label { font-size: 11px; color: #999; margin-bottom: 3px; font-weight: 600; }
+    .detail-value { font-size: 14px; color: #333; }
+    .memo-area { background: #f9fafb; border: 1px solid #eee; border-radius: 10px; padding: 12px; min-height: 80px; font-size: 13px; color: #555; line-height: 1.8; }
+    .memo-entry { padding: 3px 0; }
+    .memo-date { color: #667eea; font-weight: 600; margin-right: 6px; }
+    .detail-divider { height: 1px; background: #eee; margin: 14px 0; }
+
+    /* ── 공지/이벤트 ── */
+    .notice-tabs { display: flex; gap: 0; margin-bottom: 16px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .notice-tab {
+      flex: 1; padding: 12px; text-align: center; cursor: pointer; font-size: 14px;
+      font-weight: 500; color: #999; border-bottom: 3px solid transparent; transition: all 0.2s;
+    }
+    .notice-tab.active { color: #667eea; border-bottom-color: #667eea; font-weight: 700; background: #f8f9ff; }
+    .notice-tab .tab-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #dc2626; color: #fff; font-size: 10px; font-weight: 700;
+      min-width: 18px; height: 18px; border-radius: 10px; margin-left: 6px; padding: 0 5px;
+    }
+
+    .notice-card {
+      background: #fff; border-radius: 14px; padding: 18px; margin-bottom: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.15s;
+      border-left: 4px solid #667eea;
+    }
+    .notice-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .notice-card.unread-notice { border-left-color: #dc2626; background: #fffbfb; }
+    .notice-card.read-notice { opacity: 0.7; border-left-color: #ddd; }
+    .notice-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .notice-type {
+      font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 700;
+    }
+    .nt-sale { background: #fef3c7; color: #d97706; }
+    .nt-gift { background: #ede9fe; color: #7c3aed; }
+    .nt-general { background: #e0e7ff; color: #4f46e5; }
+    .notice-date { font-size: 11px; color: #bbb; }
+    .notice-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #dc2626; flex-shrink: 0; }
+    .notice-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 6px; }
+    .notice-preview { font-size: 13px; color: #999; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .notice-footer { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+    .notice-author { font-size: 12px; color: #999; }
+    .notice-read-status { font-size: 11px; color: #bbb; margin-left: auto; }
+    .read-avatars { display: flex; margin-left: 4px; }
+    .read-av { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; font-weight: bold; margin-right: -3px; border: 2px solid #fff; }
+    .unread-av { opacity: 0.3; }
+
+    .notice-add-btn {
+      background: #667eea; color: #fff; border: none; padding: 10px 22px;
+      border-radius: 10px; font-size: 14px; cursor: pointer; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 6px; margin-bottom: 16px;
+    }
+    .notice-add-btn:hover { background: #5a6fd6; }
+
+    /* 공지 작성 모달 큰 내용칸 */
+    .notice-content-area {
+      width: 100%; min-height: 250px; padding: 14px; border: 1.5px solid #e0e0e0;
+      border-radius: 12px; font-size: 15px; outline: none; font-family: inherit;
+      line-height: 1.8; resize: vertical;
+    }
+    .notice-content-area:focus { border-color: #667eea; }
+    .notice-modal { width: 600px; }
+
+    /* 공지 상세 */
+    .notice-detail-content {
+      background: #f9fafb; border-radius: 12px; padding: 20px;
+      font-size: 15px; color: #444; line-height: 1.9; min-height: 120px;
+      white-space: pre-wrap;
+    }
+    .notice-read-section { margin-top: 16px; padding-top: 14px; border-top: 1px solid #eee; }
+    .notice-read-title { font-size: 12px; color: #999; font-weight: 600; margin-bottom: 8px; }
+    .notice-read-list { display: flex; gap: 12px; }
+    .notice-read-person { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+    .notice-read-person.is-read { color: #22c55e; }
+    .notice-read-person.not-read { color: #ccc; }
+
+    /* ── 반응형 ── */
+    @media (max-width: 768px) {
+      .login-cards { flex-direction: column; gap: 12px; }
+      .login-card { padding: 24px 36px; }
+      .dash-grid { grid-template-columns: repeat(2, 1fr); }
+      .dash-row { grid-template-columns: 1fr; }
+      .kanban { grid-template-columns: 1fr; }
+      .kanban-col { min-height: auto; }
+      .month-stats { grid-template-columns: 1fr; }
+      .modal, .notice-modal { width: 95%; margin: 0 8px; padding: 18px; }
+      .notice-content-area { min-height: 180px; }
+      .cal-day { min-height: 60px; padding: 4px; }
+      .cal-event { font-size: 8px; padding: 1px 3px; }
+      .day-num { font-size: 11px; }
+      .notif-panel { width: 280px; right: 8px; }
+      .header h2 { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════ 로그인 ════ -->
+<div class="login-screen" id="loginScreen">
+  <h1>팀 업무 관리</h1>
+  <p>누구로 접속할까요?</p>
+  <div class="login-cards">
+    <div class="login-card" onclick="login('지원','jiwon')"><div class="avatar av-jiwon">지</div><div class="name">지원</div><div class="role">프로젝트 리더</div></div>
+    <div class="login-card" onclick="login('소영','soyoung')"><div class="avatar av-soyoung">소</div><div class="name">소영</div><div class="role">팀원</div></div>
+    <div class="login-card" onclick="login('슬기','seulgi')"><div class="avatar av-seulgi">슬</div><div class="name">슬기</div><div class="role">팀원</div></div>
+  </div>
+</div>
+
+<!-- ════ 메인 앱 ════ -->
+<div class="app" id="app">
+  <div class="header">
+    <div class="header-left">
+      <div class="avatar-sm" id="headerAvatar">지</div>
+      <h2>팀 업무 관리</h2>
+    </div>
+    <div class="header-right">
+      <button class="notif-btn" onclick="toggleNotif()">🔔<span class="notif-badge">3</span></button>
+      <span style="font-size:13px;color:#666;" id="headerName">지원</span>
+      <button class="logout-btn" onclick="logout()">로그아웃</button>
+    </div>
+    <div class="notif-panel" id="notifPanel">
+      <div class="notif-header">알림</div>
+      <div class="notif-item unread"><div class="notif-text">🔴 <b>제안서 수정</b> 마감일이 지났습니다!</div><div class="notif-time">1시간 전</div></div>
+      <div class="notif-item unread"><div class="notif-text">📋 <b>소영</b>님이 SNS 검토를 요청했습니다</div><div class="notif-time">3시간 전</div></div>
+      <div class="notif-item unread"><div class="notif-text">⏰ <b>예산안 확인</b> 마감이 내일입니다</div><div class="notif-time">오전 9시</div></div>
+      <div class="notif-item"><div class="notif-text">✅ <b>슬기</b>님이 모니터링 설정을 완료</div><div class="notif-time">어제</div></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- ── 대시보드 ── -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="dash-welcome">안녕하세요, <span id="dashName">지원</span>님!</div>
+      <div class="dash-grid">
+        <div class="dash-card"><div class="num num-urgent">2</div><div class="label">긴급</div></div>
+        <div class="dash-card"><div class="num num-progress">3</div><div class="label">진행중</div></div>
+        <div class="dash-card"><div class="num num-today">5</div><div class="label">오늘 할 일</div></div>
+        <div class="dash-card"><div class="num num-done">12</div><div class="label">이달 완료</div></div>
+      </div>
+      <div class="dash-row">
+        <div class="dash-section">
+          <div class="dash-section-title">📌 오늘 해야 할 일</div>
+          <div class="today-task urgent"><span class="tt-title">클라이언트 제안서 수정</span><span class="tt-deadline overdue">마감 지남!</span></div>
+          <div class="today-task urgent"><span class="tt-title">3월 예산안 최종 확인</span><span class="tt-deadline">내일 마감</span></div>
+          <div class="today-task normal"><span class="tt-title">회의실 예약 시스템 리서치</span><span class="tt-deadline">03.21</span></div>
+        </div>
+        <div class="dash-section">
+          <div class="dash-section-title">👥 팀원 현황</div>
+          <div class="team-member-row"><div class="avatar-xs av-jiwon">지</div><span class="tm-name">지원</span><div class="tm-bar"><div class="tm-bar-fill" style="width:60%;background:#667eea;"></div></div><span class="tm-count">3/5</span></div>
+          <div class="team-member-row"><div class="avatar-xs av-soyoung">소</div><span class="tm-name">소영</span><div class="tm-bar"><div class="tm-bar-fill" style="width:33%;background:#f093fb;"></div></div><span class="tm-count">1/3</span></div>
+          <div class="team-member-row"><div class="avatar-xs av-seulgi">슬</div><span class="tm-name">슬기</span><div class="tm-bar"><div class="tm-bar-fill" style="width:50%;background:#4facfe;"></div></div><span class="tm-count">1/2</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 내 업무 ── -->
+    <div class="tab-content" id="tab-todo">
+      <div class="filter-bar">
+        <input class="search-input" placeholder="🔍 업무 검색..." oninput="filterTasks(this)">
+        <div class="filter-chip active" onclick="toggleFilter(this)">전체</div>
+        <div class="filter-chip" onclick="toggleFilter(this)">🔴 긴급</div>
+        <div class="filter-chip" onclick="toggleFilter(this)">🔵 일보따리</div>
+      </div>
+      <div class="category">
+        <div class="category-header"><span class="cat-badge badge-urgent">긴급</span><span class="cat-count">2건</span></div>
+        <div class="task-card urgent-border" onclick="openModal('detailModal1')">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-info"><div class="task-title">클라이언트 제안서 수정</div><div class="task-meta"><span class="meta-tag tag-overdue">📅 03.16 마감지남</span><span class="meta-tag tag-assignee">👤 소영</span><span class="meta-tag tag-memo">📝 4</span><span class="meta-tag tag-status">진행중</span></div></div>
+        </div>
+        <div class="task-card urgent-border" onclick="openModal('detailModal2')">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-info"><div class="task-title">3월 예산안 최종 확인</div><div class="task-meta"><span class="meta-tag tag-deadline">📅 03.19 (내일)</span><span class="meta-tag tag-status">시작 전</span></div></div>
+        </div>
+      </div>
+      <div class="category">
+        <div class="category-header"><span class="cat-badge badge-normal">일보따리</span><span class="cat-count">3건</span></div>
+        <div class="task-card normal-border"><div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div><div class="task-info"><div class="task-title">회의실 예약 시스템 리서치</div><div class="task-meta"><span class="meta-tag tag-deadline">📅 03.21</span><span class="meta-tag tag-assignee">👤 슬기</span><span class="meta-tag tag-status">진행중</span></div></div></div>
+        <div class="task-card normal-border"><div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div><div class="task-info"><div class="task-title">주간 보고서 양식 정리</div><div class="task-meta"><span class="meta-tag tag-deadline">📅 03.25</span><span class="meta-tag tag-status">시작 전</span></div></div></div>
+        <div class="task-card normal-border"><div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div><div class="task-info"><div class="task-title">팀 워크숍 장소 알아보기</div><div class="task-meta"><span class="meta-tag tag-assignee">👤 소영, 슬기</span><span class="meta-tag tag-status">시작 전</span></div></div></div>
+      </div>
+    </div>
+
+    <!-- ── 칸반보드 ── -->
+    <div class="tab-content" id="tab-kanban">
+      <div class="kanban">
+        <div class="kanban-col" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="leaveDrop(this)">
+          <div class="kanban-header todo-h"><span class="kanban-title">📋 시작 전</span><span class="kanban-count">2</span></div>
+          <div class="kanban-card" draggable="true" ondragstart="drag(event)" id="k1"><div class="kc-title">3월 예산안 최종 확인</div><div class="kc-meta"><span class="kc-priority kc-p-urgent">긴급</span><span class="kc-deadline">📅 03.19</span></div><div class="kc-assignees"><div class="kc-av av-jiwon">지</div></div></div>
+          <div class="kanban-card" draggable="true" ondragstart="drag(event)" id="k2"><div class="kc-title">주간 보고서 양식 정리</div><div class="kc-meta"><span class="kc-priority kc-p-normal">일보따리</span><span class="kc-deadline">📅 03.25</span></div><div class="kc-assignees"><div class="kc-av av-jiwon">지</div></div></div>
+          <div class="drag-hint">드래그해서 놓기</div>
+        </div>
+        <div class="kanban-col" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="leaveDrop(this)">
+          <div class="kanban-header progress-h"><span class="kanban-title">🔄 진행중</span><span class="kanban-count">2</span></div>
+          <div class="kanban-card" draggable="true" ondragstart="drag(event)" id="k3"><div class="kc-title">클라이언트 제안서 수정</div><div class="kc-meta"><span class="kc-priority kc-p-urgent">긴급</span><span class="kc-deadline" style="color:#dc2626;">📅 03.16 마감!</span></div><div class="kc-assignees"><div class="kc-av av-jiwon">지</div><div class="kc-av av-soyoung">소</div></div></div>
+          <div class="kanban-card" draggable="true" ondragstart="drag(event)" id="k4"><div class="kc-title">회의실 예약 시스템 리서치</div><div class="kc-meta"><span class="kc-priority kc-p-normal">일보따리</span><span class="kc-deadline">📅 03.21</span></div><div class="kc-assignees"><div class="kc-av av-jiwon">지</div><div class="kc-av av-seulgi">슬</div></div></div>
+          <div class="drag-hint">드래그해서 놓기</div>
+        </div>
+        <div class="kanban-col" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="leaveDrop(this)">
+          <div class="kanban-header done-h"><span class="kanban-title">✅ 완료</span><span class="kanban-count">1</span></div>
+          <div class="kanban-card" draggable="true" ondragstart="drag(event)" id="k5" style="opacity:0.6;"><div class="kc-title" style="text-decoration:line-through;color:#999;">팀 워크숍 장소 알아보기</div><div class="kc-meta"><span class="kc-priority kc-p-normal">일보따리</span></div><div class="kc-assignees"><div class="kc-av av-soyoung">소</div><div class="kc-av av-seulgi">슬</div></div></div>
+          <div class="drag-hint">드래그해서 놓기</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 캘린더 ── -->
+    <div class="tab-content" id="tab-calendar">
+      <div class="cal-header">
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="changeCalMonth(-1)">◀</button>
+          <span class="cal-month" id="calMonth">2026년 3월</span>
+          <button class="cal-nav-btn" onclick="changeCalMonth(1)">▶</button>
+        </div>
+        <div class="cal-legend">
+          <span><span class="cal-legend-dot" style="background:#dc2626;"></span>긴급</span>
+          <span><span class="cal-legend-dot" style="background:#4f46e5;"></span>일보따리</span>
+          <span><span class="cal-legend-dot" style="background:#22c55e;"></span>완료</span>
+        </div>
+      </div>
+      <div class="calendar">
+        <div class="cal-weekdays">
+          <div class="cal-weekday">일</div><div class="cal-weekday">월</div><div class="cal-weekday">화</div>
+          <div class="cal-weekday">수</div><div class="cal-weekday">목</div><div class="cal-weekday">금</div><div class="cal-weekday">토</div>
+        </div>
+        <div class="cal-days" id="calDays"></div>
+      </div>
+      <div class="cal-selected-day" id="calDetail">
+        <div class="cal-sel-title" id="calSelTitle">3월 18일 (오늘)</div>
+        <div class="cal-sel-task"><div class="cst-priority cst-urgent"></div><span class="cst-title">클라이언트 제안서 수정 (마감 지남)</span><span class="cst-assignee">지원, 소영</span></div>
+        <div class="cal-sel-task"><div class="cst-priority cst-urgent"></div><span class="cst-title">3월 예산안 최종 확인</span><span class="cst-assignee">지원</span></div>
+      </div>
+    </div>
+
+    <!-- ── 팀 업무 ── -->
+    <div class="tab-content" id="tab-team">
+      <div class="team-filter">
+        <div class="team-chip tc-all active" onclick="filterTeam(this)">전체</div>
+        <div class="team-chip tc-jiwon" onclick="filterTeam(this)">지원</div>
+        <div class="team-chip tc-soyoung" onclick="filterTeam(this)">소영</div>
+        <div class="team-chip tc-seulgi" onclick="filterTeam(this)">슬기</div>
+      </div>
+      <div class="category"><div class="category-header"><div class="avatar-xs av-jiwon">지</div><span style="font-weight:700;font-size:14px;">지원</span><span class="cat-count">5건</span></div>
+        <div class="task-card urgent-border"><div class="task-info"><div class="task-title">클라이언트 제안서 수정</div><div class="task-meta"><span class="meta-tag tag-overdue">📅 03.16</span><span class="meta-tag badge-urgent" style="font-size:10px;">긴급</span><span class="meta-tag tag-status">진행중</span></div></div></div>
+        <div class="task-card urgent-border"><div class="task-info"><div class="task-title">3월 예산안 최종 확인</div><div class="task-meta"><span class="meta-tag tag-deadline">📅 03.19</span><span class="meta-tag badge-urgent" style="font-size:10px;">긴급</span><span class="meta-tag tag-status">시작 전</span></div></div></div>
+      </div>
+      <div class="category"><div class="category-header"><div class="avatar-xs av-soyoung">소</div><span style="font-weight:700;font-size:14px;">소영</span><span class="cat-count">3건</span></div>
+        <div class="task-card urgent-border"><div class="task-info"><div class="task-title">SNS 콘텐츠 3월분 제작</div><div class="task-meta"><span class="meta-tag tag-deadline">📅 03.20</span><span class="meta-tag badge-urgent" style="font-size:10px;">긴급</span><span class="meta-tag tag-status">진행중</span></div></div></div>
+        <div class="task-card normal-border"><div class="task-info"><div class="task-title">클라이언트 제안서 디자인</div><div class="task-meta"><span class="meta-tag tag-assignee">👤 지원 협업</span><span class="meta-tag tag-status">진행중</span></div></div></div>
+      </div>
+      <div class="category"><div class="category-header"><div class="avatar-xs av-seulgi">슬</div><span style="font-weight:700;font-size:14px;">슬기</span><span class="cat-count">2건</span></div>
+        <div class="task-card normal-border"><div class="task-info"><div class="task-title">회의실 예약 시스템 리서치</div><div class="task-meta"><span class="meta-tag tag-deadline">📅 03.21</span><span class="meta-tag tag-assignee">👤 지원 협업</span><span class="meta-tag tag-status">진행중</span></div></div></div>
+        <div class="task-card normal-border"><div class="task-info"><div class="task-title">서버 모니터링 설정</div><div class="task-meta"><span class="meta-tag tag-deadline">📅 03.22</span><span class="meta-tag tag-status">시작 전</span></div></div></div>
+      </div>
+    </div>
+
+    <!-- ── 월별 조회 ── -->
+    <div class="tab-content" id="tab-monthly">
+      <div class="month-selector">
+        <button class="month-nav" onclick="changeMonth(-1)">◀</button>
+        <span class="month-label" id="monthLabel">2026년 3월</span>
+        <button class="month-nav" onclick="changeMonth(1)">▶</button>
+      </div>
+      <div class="month-stats">
+        <div class="stat-card"><div class="stat-number num-done">12</div><div class="stat-label">완료</div></div>
+        <div class="stat-card"><div class="stat-number num-progress">5</div><div class="stat-label">진행중</div></div>
+        <div class="stat-card"><div class="stat-number num-urgent">2</div><div class="stat-label">긴급 처리</div></div>
+      </div>
+      <div class="filter-bar"><div class="filter-chip active" onclick="toggleFilter(this)">전체</div><div class="filter-chip" onclick="toggleFilter(this)">지원</div><div class="filter-chip" onclick="toggleFilter(this)">소영</div><div class="filter-chip" onclick="toggleFilter(this)">슬기</div></div>
+      <div class="completed-task"><span class="ct-check">✓</span><span class="ct-title">2월 실적 보고서 작성</span><span class="ct-who">지원</span><span class="ct-date">03.15</span></div>
+      <div class="completed-task"><span class="ct-check">✓</span><span class="ct-title">신규 프로젝트 킥오프 미팅</span><span class="ct-who">전체</span><span class="ct-date">03.14</span></div>
+      <div class="completed-task"><span class="ct-check">✓</span><span class="ct-title">거래처 계약서 검토</span><span class="ct-who">지원</span><span class="ct-date">03.12</span></div>
+      <div class="completed-task"><span class="ct-check">✓</span><span class="ct-title">SNS 2월 결산 리포트</span><span class="ct-who">소영</span><span class="ct-date">03.11</span></div>
+      <div class="completed-task"><span class="ct-check">✓</span><span class="ct-title">팀 회식 장소 예약</span><span class="ct-who">슬기</span><span class="ct-date">03.10</span></div>
+      <div class="completed-task"><span class="ct-check">✓</span><span class="ct-title">1분기 KPI 중간점검</span><span class="ct-who">전체</span><span class="ct-date">03.07</span></div>
+    </div>
+  </div>
+
+    <!-- ── 공지/이벤트 ── -->
+    <div class="tab-content" id="tab-notice">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <button class="notice-add-btn" onclick="openModal('noticeAddModal')">📢 공지 작성</button>
+      </div>
+
+      <!-- 읽음/안읽음 탭 -->
+      <div class="notice-tabs">
+        <div class="notice-tab active" onclick="switchNoticeTab(this,'all')">전체</div>
+        <div class="notice-tab" onclick="switchNoticeTab(this,'unread')">안읽음 <span class="tab-badge">2</span></div>
+        <div class="notice-tab" onclick="switchNoticeTab(this,'read')">읽음</div>
+      </div>
+
+      <!-- 안읽은 공지 -->
+      <div class="notice-card unread-notice" onclick="openModal('noticeDetail1')">
+        <div class="notice-top">
+          <span class="notice-unread-dot"></span>
+          <span class="notice-type nt-sale">타임세일</span>
+          <span class="notice-date">03.18 (오늘)</span>
+        </div>
+        <div class="notice-title">🔥 이번주 타임세일: 봄시즌 신상품 30% OFF</div>
+        <div class="notice-preview">3/18(화) ~ 3/22(일) 봄시즌 신상품 전품목 30% 할인 진행합니다. 매장 POP 설치 및 SNS 홍보 부탁드립니다. 세일 대상 품목 리스트는 아래 참고해주세요.</div>
+        <div class="notice-footer">
+          <span class="notice-author">지원</span>
+          <span class="notice-read-status">읽음 1/3
+            <span class="read-avatars">
+              <span class="read-av av-jiwon">지</span>
+              <span class="read-av av-soyoung unread-av">소</span>
+              <span class="read-av av-seulgi unread-av">슬</span>
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <div class="notice-card unread-notice" onclick="openModal('noticeDetail2')">
+        <div class="notice-top">
+          <span class="notice-unread-dot"></span>
+          <span class="notice-type nt-gift">증정이벤트</span>
+          <span class="notice-date">03.17</span>
+        </div>
+        <div class="notice-title">🎁 3월 사은품 증정 이벤트 안내</div>
+        <div class="notice-preview">5만원 이상 구매 고객에게 미니 파우치 증정 (재고 소진시 종료). 사은품 수량: 각 매장 50개. 이벤트 기간: 3/17 ~ 3/31</div>
+        <div class="notice-footer">
+          <span class="notice-author">소영</span>
+          <span class="notice-read-status">읽음 2/3
+            <span class="read-avatars">
+              <span class="read-av av-jiwon unread-av">지</span>
+              <span class="read-av av-soyoung">소</span>
+              <span class="read-av av-seulgi">슬</span>
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <!-- 읽은 공지 -->
+      <div class="notice-card read-notice">
+        <div class="notice-top">
+          <span class="notice-type nt-sale">타임세일</span>
+          <span class="notice-date">03.10</span>
+        </div>
+        <div class="notice-title">지난주 타임세일 결과 공유</div>
+        <div class="notice-preview">3/10~3/14 타임세일 매출 요약: 전주 대비 23% 상승. 인기 품목: 스프링코트, 니트가디건</div>
+        <div class="notice-footer">
+          <span class="notice-author">지원</span>
+          <span class="notice-read-status">읽음 3/3 ✅</span>
+        </div>
+      </div>
+
+      <div class="notice-card read-notice">
+        <div class="notice-top">
+          <span class="notice-type nt-general">공지</span>
+          <span class="notice-date">03.05</span>
+        </div>
+        <div class="notice-title">3월 근무 일정 안내</div>
+        <div class="notice-preview">3월 공휴일 및 대체 근무일 안내입니다. 달력 확인해주세요.</div>
+        <div class="notice-footer">
+          <span class="notice-author">지원</span>
+          <span class="notice-read-status">읽음 3/3 ✅</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 하단 네비게이션 -->
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="navTo('dashboard',this)"><span class="nav-icon">🏠</span>홈</div>
+    <div class="nav-item" onclick="navTo('todo',this)"><span class="nav-icon">📋</span>업무</div>
+    <div class="nav-item nav-add" onclick="openModal('addModal')"><div class="nav-add-btn">+</div></div>
+    <div class="nav-item" onclick="navTo('notice',this)"><span class="nav-icon">📢</span>공지</div>
+    <div class="nav-item" onclick="navTo('calendar',this)"><span class="nav-icon">📅</span>캘린더</div>
+  </div>
+</div>
+
+<!-- ════ 업무 등록 모달 ════ -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h3>새 업무 등록</h3>
+    <label>업무 제목</label><input type="text" placeholder="어떤 일을 해야 하나요?">
+    <label>우선순위</label><div class="priority-selector"><div class="priority-option sel-urgent" onclick="selPriority(this,'urgent')">🔴 긴급</div><div class="priority-option" onclick="selPriority(this,'normal')">🔵 일보따리</div></div>
+    <label>상태</label><div class="status-selector"><div class="status-option sel-todo" onclick="selStatus(this,'todo')">시작 전</div><div class="status-option" onclick="selStatus(this,'progress')">진행중</div><div class="status-option" onclick="selStatus(this,'done')">완료</div></div>
+    <label>마감일</label><input type="date">
+    <label>담당 팀원</label><div class="assignee-chips"><div class="assignee-chip" onclick="toggleAssignee(this)">지원</div><div class="assignee-chip" onclick="toggleAssignee(this)">소영</div><div class="assignee-chip" onclick="toggleAssignee(this)">슬기</div></div>
+    <label>메모</label><textarea placeholder="참고사항, 진행 내용 등을 적어주세요"></textarea>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeModal('addModal')">취소</button><button class="btn-submit" onclick="closeModal('addModal')">등록</button></div>
+  </div>
+</div>
+
+<!-- ════ 상세 모달 1 ════ -->
+<div class="modal-overlay" id="detailModal1">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <h3 style="margin:0;">클라이언트 제안서 수정</h3>
+      <span class="cat-badge badge-urgent">긴급</span><span class="meta-tag tag-status">진행중</span>
+    </div>
+    <div class="detail-row"><div class="detail-label">마감일</div><div class="detail-value" style="color:#dc2626;font-weight:600;">📅 2026.03.16 (마감 지남!)</div></div>
+    <div class="detail-row"><div class="detail-label">담당</div><div class="detail-value"><span class="avatar-xs av-jiwon" style="width:22px;height:22px;font-size:10px;display:inline-flex;">지</span> 지원 <span class="avatar-xs av-soyoung" style="width:22px;height:22px;font-size:10px;display:inline-flex;margin-left:8px;">소</span> 소영</div></div>
+    <div class="detail-divider"></div>
+    <div class="detail-row"><div class="detail-label">메모</div>
+      <div class="memo-area"><div class="memo-entry"><span class="memo-date">3/14</span>1차 초안 작성 완료</div><div class="memo-entry"><span class="memo-date">3/15</span>김 대리 피드백: 예산 부분 수정 필요</div><div class="memo-entry"><span class="memo-date">3/16</span>디자인은 소영이가 맡기로 함</div><div class="memo-entry"><span class="memo-date">3/17</span>최종본 PDF 변환 후 메일 발송 예정</div></div>
+    </div>
+    <label>메모 추가</label><div style="display:flex;gap:8px;"><input type="text" placeholder="새 메모 입력..." style="flex:1;"><button class="btn-submit">추가</button></div>
+    <div class="modal-btns"><button class="btn-delete">삭제</button><button class="btn-cancel" onclick="closeModal('detailModal1')">닫기</button><button class="btn-submit" onclick="closeModal('detailModal1')">수정</button></div>
+  </div>
+</div>
+
+<!-- ════ 상세 모달 2 ════ -->
+<div class="modal-overlay" id="detailModal2">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <h3 style="margin:0;">3월 예산안 최종 확인</h3>
+      <span class="cat-badge badge-urgent">긴급</span><span class="meta-tag tag-status">시작 전</span>
+    </div>
+    <div class="detail-row"><div class="detail-label">마감일</div><div class="detail-value" style="color:#d97706;">📅 2026.03.19 (내일)</div></div>
+    <div class="detail-row"><div class="detail-label">담당</div><div class="detail-value"><span class="avatar-xs av-jiwon" style="width:22px;height:22px;font-size:10px;display:inline-flex;">지</span> 지원</div></div>
+    <div class="detail-divider"></div>
+    <div class="detail-row"><div class="detail-label">메모</div><div class="memo-area" style="color:#ccc;">아직 메모가 없습니다</div></div>
+    <label>메모 추가</label><div style="display:flex;gap:8px;"><input type="text" placeholder="새 메모 입력..." style="flex:1;"><button class="btn-submit">추가</button></div>
+    <div class="modal-btns"><button class="btn-delete">삭제</button><button class="btn-cancel" onclick="closeModal('detailModal2')">닫기</button><button class="btn-submit" onclick="closeModal('detailModal2')">수정</button></div>
+  </div>
+</div>
+
+<!-- ════ 공지 작성 모달 ════ -->
+<div class="modal-overlay" id="noticeAddModal">
+  <div class="modal notice-modal">
+    <h3>📢 공지 작성</h3>
+    <label>제목</label>
+    <input type="text" placeholder="공지 제목을 입력하세요">
+    <label>분류</label>
+    <div class="priority-selector">
+      <div class="priority-option sel-urgent" onclick="selNoticeType(this)" style="border-color:#d97706;background:#fef3c7;color:#d97706;">🏷️ 타임세일</div>
+      <div class="priority-option" onclick="selNoticeType(this)" style="">🎁 증정이벤트</div>
+      <div class="priority-option" onclick="selNoticeType(this)" style="">📋 일반공지</div>
+    </div>
+    <label>이벤트 기간 (선택)</label>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="date" style="flex:1;"> <span style="color:#999;">~</span> <input type="date" style="flex:1;">
+    </div>
+    <label>내용</label>
+    <textarea class="notice-content-area" placeholder="공지 내용을 자세히 입력하세요.
+
+예시:
+- 세일 대상 품목
+- 할인율 및 기간
+- 매장별 주의사항
+- 사은품 수량 및 조건"></textarea>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('noticeAddModal')">취소</button>
+      <button class="btn-submit" onclick="closeModal('noticeAddModal')">등록</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 공지 상세 모달 1 ════ -->
+<div class="modal-overlay" id="noticeDetail1">
+  <div class="modal notice-modal">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <h3 style="margin:0;">🔥 이번주 타임세일: 봄시즌 신상품 30% OFF</h3>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
+      <span class="notice-type nt-sale">타임세일</span>
+      <span style="font-size:13px;color:#999;">03.18 (오늘) · 지원</span>
+    </div>
+    <div class="notice-detail-content">📅 기간: 3/18(화) ~ 3/22(일)
+
+📦 대상: 봄시즌 신상품 전품목
+
+💰 할인율: 30% OFF
+
+📋 할 일:
+- 매장 POP 설치 (슬기)
+- SNS 홍보 포스팅 (소영)
+- 매장 재고 확인 (지원)
+
+⚠️ 주의사항:
+- 기존 세일 품목과 중복 할인 불가
+- 멤버십 추가 할인은 적용 가능
+- 재고 소진 시 개별 품목 종료 가능</div>
+
+    <div class="notice-read-section">
+      <div class="notice-read-title">읽음 확인 (1/3)</div>
+      <div class="notice-read-list">
+        <div class="notice-read-person is-read"><span class="avatar-xs av-jiwon" style="width:24px;height:24px;font-size:10px;">지</span> 지원 ✅</div>
+        <div class="notice-read-person not-read"><span class="avatar-xs av-soyoung" style="width:24px;height:24px;font-size:10px;">소</span> 소영 ❌</div>
+        <div class="notice-read-person not-read"><span class="avatar-xs av-seulgi" style="width:24px;height:24px;font-size:10px;">슬</span> 슬기 ❌</div>
+      </div>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn-delete">삭제</button>
+      <button class="btn-cancel" onclick="closeModal('noticeDetail1')">닫기</button>
+      <button class="btn-submit" onclick="closeModal('noticeDetail1')">수정</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 공지 상세 모달 2 ════ -->
+<div class="modal-overlay" id="noticeDetail2">
+  <div class="modal notice-modal">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <h3 style="margin:0;">🎁 3월 사은품 증정 이벤트 안내</h3>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
+      <span class="notice-type nt-gift">증정이벤트</span>
+      <span style="font-size:13px;color:#999;">03.17 · 소영</span>
+    </div>
+    <div class="notice-detail-content">🎁 이벤트: 5만원 이상 구매 시 미니 파우치 증정
+
+📅 기간: 3/17(월) ~ 3/31(월) 또는 재고 소진시
+
+📦 사은품 수량:
+- 각 매장 50개 배정
+- 추가 수량 필요 시 지원에게 요청
+
+📋 진행 방법:
+1. 결제 완료 후 영수증 확인
+2. 5만원 이상이면 사은품 전달
+3. 사은품 대장에 기록 (수량 관리)
+
+⚠️ 주의:
+- 교환/환불 시 사은품 회수
+- 온라인 구매 건은 해당 없음</div>
+
+    <div class="notice-read-section">
+      <div class="notice-read-title">읽음 확인 (2/3)</div>
+      <div class="notice-read-list">
+        <div class="notice-read-person not-read"><span class="avatar-xs av-jiwon" style="width:24px;height:24px;font-size:10px;">지</span> 지원 ❌</div>
+        <div class="notice-read-person is-read"><span class="avatar-xs av-soyoung" style="width:24px;height:24px;font-size:10px;">소</span> 소영 ✅</div>
+        <div class="notice-read-person is-read"><span class="avatar-xs av-seulgi" style="width:24px;height:24px;font-size:10px;">슬</span> 슬기 ✅</div>
+      </div>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn-delete">삭제</button>
+      <button class="btn-cancel" onclick="closeModal('noticeDetail2')">닫기</button>
+      <button class="btn-submit" onclick="closeModal('noticeDetail2')">수정</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentUser = null;
+
+function login(name, id) {
+  currentUser = { name, id };
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('headerName').textContent = name;
+  document.getElementById('dashName').textContent = name;
+  const av = document.getElementById('headerAvatar');
+  av.textContent = name[0]; av.className = 'avatar-sm av-' + id;
+  renderCalendar(2026, 2);
+}
+
+function logout() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('notifPanel').classList.remove('show');
+  currentUser = null;
+}
+
+// 네비게이션
+function navTo(name, el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  if (el && !el.classList.contains('nav-add')) el.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('notifPanel').classList.remove('show');
+}
+
+function toggleNotif() { document.getElementById('notifPanel').classList.toggle('show'); }
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(o => { o.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); }); });
+
+function toggleCheck(el) { el.classList.toggle('checked'); el.closest('.task-card').classList.toggle('checked-card'); }
+function selPriority(el, t) { document.querySelectorAll('.priority-option').forEach(e => e.className = 'priority-option'); el.classList.add(t === 'urgent' ? 'sel-urgent' : 'sel-normal'); }
+function selStatus(el, t) { document.querySelectorAll('.status-option').forEach(e => e.className = 'status-option'); el.classList.add('sel-' + t); }
+function toggleAssignee(el) { el.classList.toggle('selected'); }
+function toggleFilter(el) { el.parentElement.querySelectorAll('.filter-chip').forEach(e => e.classList.remove('active')); el.classList.add('active'); }
+function filterTeam(el) { document.querySelectorAll('.team-chip').forEach(e => e.classList.remove('active')); el.classList.add('active'); }
+function filterTasks(input) { const q = input.value.toLowerCase(); document.querySelectorAll('#tab-todo .task-card').forEach(c => { c.style.display = c.querySelector('.task-title').textContent.toLowerCase().includes(q) ? 'flex' : 'none'; }); }
+
+// 공지 탭 전환 (전체/안읽음/읽음)
+function switchNoticeTab(el, type) {
+  document.querySelectorAll('.notice-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('#tab-notice .notice-card').forEach(card => {
+    if (type === 'all') { card.style.display = 'block'; }
+    else if (type === 'unread') { card.style.display = card.classList.contains('unread-notice') ? 'block' : 'none'; }
+    else if (type === 'read') { card.style.display = card.classList.contains('read-notice') ? 'block' : 'none'; }
+  });
+}
+
+function selNoticeType(el) {
+  el.parentElement.querySelectorAll('.priority-option').forEach(e => {
+    e.style.borderColor = '#eee'; e.style.background = '#fff'; e.style.color = '#333';
+  });
+  el.style.borderColor = '#667eea'; el.style.background = '#e0e7ff'; el.style.color = '#667eea';
+}
+
+// 칸반
+function allowDrop(e) { e.preventDefault(); e.currentTarget.style.background = '#e8e8e8'; }
+function leaveDrop(el) { el.style.background = '#f5f5f5'; }
+function drag(e) { e.dataTransfer.setData('text', e.target.id); e.target.classList.add('dragging'); }
+function drop(e) { e.preventDefault(); e.currentTarget.style.background = '#f5f5f5'; const el = document.getElementById(e.dataTransfer.getData('text')); if (el) { el.classList.remove('dragging'); e.currentTarget.insertBefore(el, e.currentTarget.querySelector('.drag-hint')); } }
+
+// 월별
+let cMonth = 2, cYear = 2026;
+function changeMonth(d) { cMonth += d; if (cMonth > 11) { cMonth = 0; cYear++; } if (cMonth < 0) { cMonth = 11; cYear--; } document.getElementById('monthLabel').textContent = cYear + '년 ' + (cMonth+1) + '월'; }
+
+// ── 캘린더 ──
+const calEvents = {
+  '2026-03-16': [{ title: '제안서 수정 마감', type: 'urgent', who: '지원, 소영' }],
+  '2026-03-19': [{ title: '예산안 최종 확인', type: 'urgent', who: '지원' }],
+  '2026-03-20': [{ title: 'SNS 콘텐츠 제작', type: 'urgent', who: '소영' }],
+  '2026-03-21': [{ title: '회의실 리서치', type: 'normal', who: '지원, 슬기' }],
+  '2026-03-22': [{ title: '서버 모니터링', type: 'normal', who: '슬기' }],
+  '2026-03-25': [{ title: '보고서 양식 정리', type: 'normal', who: '지원' }],
+  '2026-03-07': [{ title: 'KPI 중간점검', type: 'done', who: '전체' }],
+  '2026-03-10': [{ title: '회식 장소 예약', type: 'done', who: '슬기' }],
+  '2026-03-12': [{ title: '계약서 검토', type: 'done', who: '지원' }],
+  '2026-03-14': [{ title: '킥오프 미팅', type: 'done', who: '전체' }],
+  '2026-03-15': [{ title: '실적 보고서', type: 'done', who: '지원' }],
+  '2026-03-11': [{ title: 'SNS 결산 리포트', type: 'done', who: '소영' }],
+};
+
+let calYear = 2026, calMonth = 2;
+
+function changeCalMonth(d) {
+  calMonth += d;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  document.getElementById('calMonth').textContent = calYear + '년 ' + (calMonth+1) + '월';
+  renderCalendar(calYear, calMonth);
+}
+
+function renderCalendar(year, month) {
+  const container = document.getElementById('calDays');
+  container.innerHTML = '';
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevDays = new Date(year, month, 0).getDate();
+  const today = new Date();
+  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+
+  // 이전 달
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = document.createElement('div');
+    d.className = 'cal-day other-month';
+    d.innerHTML = '<div class="day-num">' + (prevDays - i) + '</div>';
+    container.appendChild(d);
+  }
+
+  // 이번 달
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d = document.createElement('div');
+    const dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+    d.className = 'cal-day';
+    if (isCurrentMonth && day === today.getDate()) d.classList.add('today');
+
+    let html = '<div class="day-num">' + day + '</div>';
+    if (calEvents[dateStr]) {
+      calEvents[dateStr].forEach((ev, idx) => {
+        if (idx < 2) {
+          const cls = ev.type === 'urgent' ? 'ev-urgent' : ev.type === 'done' ? 'ev-done' : 'ev-normal';
+          html += '<div class="cal-event ' + cls + '">' + ev.title + '</div>';
+        }
+      });
+      if (calEvents[dateStr].length > 2) html += '<div class="cal-more">+' + (calEvents[dateStr].length - 2) + '건 더</div>';
+    }
+    d.innerHTML = html;
+    d.onclick = () => selectCalDay(day, month, year, dateStr);
+    container.appendChild(d);
+  }
+
+  // 다음 달 채우기
+  const totalCells = container.children.length;
+  const remaining = (7 - totalCells % 7) % 7;
+  for (let i = 1; i <= remaining; i++) {
+    const d = document.createElement('div');
+    d.className = 'cal-day other-month';
+    d.innerHTML = '<div class="day-num">' + i + '</div>';
+    container.appendChild(d);
+  }
+}
+
+function selectCalDay(day, month, year, dateStr) {
+  const weekdays = ['일','월','화','수','목','금','토'];
+  const date = new Date(year, month, day);
+  const today = new Date();
+  let label = (month+1) + '월 ' + day + '일 (' + weekdays[date.getDay()] + ')';
+  if (date.toDateString() === today.toDateString()) label += ' - 오늘';
+
+  document.getElementById('calSelTitle').textContent = label;
+  const detail = document.getElementById('calDetail');
+  let html = '<div class="cal-sel-title">' + label + '</div>';
+
+  if (calEvents[dateStr]) {
+    calEvents[dateStr].forEach(ev => {
+      const cls = ev.type === 'urgent' ? 'cst-urgent' : 'cst-normal';
+      const style = ev.type === 'done' ? 'text-decoration:line-through;color:#999;' : '';
+      html += '<div class="cal-sel-task"><div class="cst-priority ' + cls + '"></div><span class="cst-title" style="' + style + '">' + ev.title + '</span><span class="cst-assignee">' + ev.who + '</span></div>';
+    });
+  } else {
+    html += '<div style="text-align:center;color:#ccc;padding:20px;">이 날에는 업무가 없습니다</div>';
+  }
+  detail.innerHTML = html;
+}
+
+// 클릭시 알림 닫기
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.notif-btn') && !e.target.closest('.notif-panel'))
+    document.getElementById('notifPanel').classList.remove('show');
+});
+</script>
+</body>
+</html>
