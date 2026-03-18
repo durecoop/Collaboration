@@ -467,6 +467,74 @@
       .notif-panel { width: 280px; right: 8px; }
       .header h2 { font-size: 15px; }
     }
+
+    /* ── 대시보드 카드 클릭 ── */
+    .dash-card { cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+    .dash-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+    .dash-status-modal-list { max-height: 400px; overflow-y: auto; }
+    .dash-status-item { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+    .dash-status-item:last-child { border-bottom: none; }
+    .dash-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dash-status-title { font-size: 14px; color: #333; flex: 1; }
+    .dash-status-tag { font-size: 11px; padding: 2px 8px; border-radius: 6px; }
+
+    /* ── 개인 주간 캘린더 ── */
+    .personal-week { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .pw-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .pw-title { font-size: 15px; font-weight: 700; color: #333; }
+    .pw-nav { display: flex; align-items: center; gap: 8px; }
+    .pw-nav-btn { background: #fff; border: 1px solid #ddd; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+    .pw-nav-btn:hover { background: #f0f0f0; }
+    .pw-week-label { font-size: 13px; color: #666; min-width: 120px; text-align: center; }
+    .pw-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .pw-day { background: #f9fafb; border-radius: 10px; padding: 10px 8px; min-height: 80px; }
+    .pw-day.pw-today { background: #f0f4ff; border: 2px solid #667eea; }
+    .pw-day-header { font-size: 12px; font-weight: 700; color: #999; margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .pw-day-header .pw-date { color: #333; }
+    .pw-task-item { font-size: 11px; padding: 4px 6px; border-radius: 6px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+    .pw-task-item.pw-fixed { background: #fff7ed; border: 1.5px dashed #f59e0b; color: #92400e; }
+    .pw-task-item.pw-normal { background: #e0e7ff; color: #4f46e5; }
+    .pw-task-item.pw-urgent { background: #fee2e2; color: #dc2626; }
+    .pw-task-check { width: 14px; height: 14px; border: 1.5px solid #ccc; border-radius: 3px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 9px; }
+    .pw-task-check.pw-checked { background: #22c55e; border-color: #22c55e; color: #fff; }
+    .pw-task-label { flex: 1; font-size: 11px; }
+    .pw-task-item.pw-done .pw-task-label { text-decoration: line-through; color: #bbb; }
+
+    /* ── 회의록 ── */
+    .meeting-card { background: #fff; border-radius: 14px; padding: 18px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.15s; border-left: 4px solid #10b981; }
+    .meeting-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .meeting-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .meeting-date-badge { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 700; background: #dcfce7; color: #16a34a; }
+    .meeting-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 6px; }
+    .meeting-agenda { font-size: 13px; color: #999; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .meeting-footer { display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 12px; color: #999; }
+    .meeting-attendees { display: flex; gap: -2px; }
+    .meeting-add-btn { background: #10b981; color: #fff; border: none; padding: 10px 22px; border-radius: 10px; font-size: 14px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+    .meeting-add-btn:hover { background: #059669; }
+    .meeting-detail-section { margin-top: 14px; }
+    .meeting-detail-label { font-size: 12px; color: #999; font-weight: 600; margin-bottom: 6px; }
+    .meeting-detail-content { background: #f9fafb; border-radius: 10px; padding: 14px; font-size: 14px; color: #444; line-height: 1.8; white-space: pre-wrap; }
+    .meeting-action-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+    .meeting-action-item:last-child { border-bottom: none; }
+    .meeting-action-check { width: 18px; height: 18px; border: 2px solid #ddd; border-radius: 4px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+    .meeting-action-check.mac-checked { background: #22c55e; border-color: #22c55e; color: #fff; }
+    .meeting-action-text { font-size: 13px; color: #333; flex: 1; }
+    .meeting-action-who { font-size: 11px; color: #999; white-space: nowrap; }
+    .meeting-modal { width: 600px; }
+
+    /* ── 개인 메모 ── */
+    .memo-section { margin-top: 24px; padding-top: 20px; border-top: 2px solid #f0f0f0; }
+    .memo-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .memo-section-title { font-size: 16px; font-weight: 700; color: #333; }
+    .memo-add-btn { background: #f59e0b; color: #fff; border: none; padding: 7px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 600; }
+    .memo-add-btn:hover { background: #d97706; }
+    .memo-search { padding: 9px 14px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 14px; outline: none; width: 100%; margin-bottom: 12px; }
+    .memo-search:focus { border-color: #f59e0b; }
+    .memo-card-item { background: #fffdf7; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; border-left: 4px solid #fbbf24; transition: all 0.15s; }
+    .memo-card-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .memo-card-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .memo-card-preview { font-size: 12px; color: #999; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .memo-card-date { font-size: 11px; color: #bbb; margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -508,10 +576,10 @@
     <div class="tab-content active" id="tab-dashboard">
       <div class="dash-welcome">안녕하세요, <span id="dashName">지원</span>님!</div>
       <div class="dash-grid">
-        <div class="dash-card"><div class="num num-urgent">2</div><div class="label">긴급</div></div>
-        <div class="dash-card"><div class="num num-progress">3</div><div class="label">진행중</div></div>
-        <div class="dash-card"><div class="num num-today">5</div><div class="label">오늘 할 일</div></div>
-        <div class="dash-card"><div class="num num-done">12</div><div class="label">이달 완료</div></div>
+        <div class="dash-card" onclick="openDashStatus('urgent')"><div class="num num-urgent">2</div><div class="label">긴급</div></div>
+        <div class="dash-card" onclick="openDashStatus('progress')"><div class="num num-progress">3</div><div class="label">진행중</div></div>
+        <div class="dash-card" onclick="openDashStatus('today')"><div class="num num-today">5</div><div class="label">오늘 할 일</div></div>
+        <div class="dash-card" onclick="openDashStatus('done')"><div class="num num-done">12</div><div class="label">이달 완료</div></div>
       </div>
       <div class="dash-row">
         <div class="dash-section">
@@ -531,6 +599,19 @@
 
     <!-- ── 내 업무 ── -->
     <div class="tab-content" id="tab-todo">
+      <!-- 개인 주간 캘린더 -->
+      <div class="personal-week" id="personalWeek">
+        <div class="pw-header">
+          <span class="pw-title">📅 내 주간 일정</span>
+          <div class="pw-nav">
+            <button class="pw-nav-btn" onclick="changePW(-1)">◀</button>
+            <span class="pw-week-label" id="pwLabel">3/16 ~ 3/20</span>
+            <button class="pw-nav-btn" onclick="changePW(1)">▶</button>
+          </div>
+        </div>
+        <div class="pw-grid" id="pwGrid"></div>
+      </div>
+
       <div class="filter-bar">
         <input class="search-input" placeholder="🔍 업무 검색..." oninput="filterTasks(this)">
         <div class="filter-chip active" onclick="toggleFilter(this)">전체</div>
@@ -553,6 +634,21 @@
         <div class="task-card normal-border"><div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div><div class="task-info"><div class="task-title">회의실 예약 시스템 리서치</div><div class="task-meta"><span class="meta-tag tag-deadline">📅 03.21</span><span class="meta-tag tag-assignee">👤 슬기</span><span class="meta-tag tag-status">진행중</span></div></div></div>
         <div class="task-card normal-border"><div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div><div class="task-info"><div class="task-title">주간 보고서 양식 정리</div><div class="task-meta"><span class="meta-tag tag-deadline">📅 03.25</span><span class="meta-tag tag-status">시작 전</span></div></div></div>
         <div class="task-card normal-border"><div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div><div class="task-info"><div class="task-title">팀 워크숍 장소 알아보기</div><div class="task-meta"><span class="meta-tag tag-assignee">👤 소영, 슬기</span><span class="meta-tag tag-status">시작 전</span></div></div></div>
+      </div>
+
+      <!-- 개인 메모 -->
+      <div class="memo-section">
+        <div class="memo-section-header">
+          <span class="memo-section-title">📒 내 메모</span>
+          <button class="memo-add-btn" onclick="openModal('memoAddModal')">+ 메모 작성</button>
+        </div>
+        <input class="memo-search" placeholder="🔍 메모 검색..." oninput="filterMemos(this)">
+        <div id="memoList">
+          <div class="memo-card-item" data-title="타임세일 체크리스트" data-content="POP 설치 확인, 할인 태그 부착, SNS 홍보 포스팅 예약, 재고 수량 체크"><div class="memo-card-title">타임세일 체크리스트</div><div class="memo-card-preview">POP 설치 확인, 할인 태그 부착, SNS 홍보 포스팅 예약, 재고 수량 체크</div><div class="memo-card-date">2026.03.18</div></div>
+          <div class="memo-card-item" data-title="거래처 미팅 메모" data-content="담당자: 김과장, 납품 단가 5% 인하 요청, 다음 미팅 4월 첫째주 예정"><div class="memo-card-title">거래처 미팅 메모</div><div class="memo-card-preview">담당자: 김과장, 납품 단가 5% 인하 요청, 다음 미팅 4월 첫째주 예정</div><div class="memo-card-date">2026.03.17</div></div>
+          <div class="memo-card-item" data-title="신상품 아이디어" data-content="여름 시즌 준비: 린넨 소재 의류, 쿨링 액세서리, 비치웨어 라인 검토"><div class="memo-card-title">신상품 아이디어</div><div class="memo-card-preview">여름 시즌 준비: 린넨 소재 의류, 쿨링 액세서리, 비치웨어 라인 검토</div><div class="memo-card-date">2026.03.15</div></div>
+          <div class="memo-card-item" data-title="팀 회식 후기" data-content="장소: 강남 이탈리안 레스토랑, 분위기 좋았음. 다음엔 한식으로 하자는 의견"><div class="memo-card-title">팀 회식 후기</div><div class="memo-card-preview">장소: 강남 이탈리안 레스토랑, 분위기 좋았음. 다음엔 한식으로 하자는 의견</div><div class="memo-card-date">2026.03.10</div></div>
+        </div>
       </div>
     </div>
 
@@ -742,6 +838,41 @@
     </div>
   </div>
 
+    <!-- ── 회의록 ── -->
+    <div class="tab-content" id="tab-meeting">
+      <button class="meeting-add-btn" onclick="openModal('meetingAddModal')">📝 회의록 작성</button>
+
+      <div class="meeting-card" onclick="openModal('meetingDetail1')">
+        <div class="meeting-top"><span class="meeting-date-badge">03.18 (수)</span></div>
+        <div class="meeting-title">주간 정기회의 - 3월 3주차</div>
+        <div class="meeting-agenda">타임세일 진행 상황 공유, 제안서 마감 일정 논의, 4월 프로모션 기획 논의</div>
+        <div class="meeting-footer">
+          <span>👥 참석: 지원, 소영, 슬기</span>
+          <span style="margin-left:auto;">체크사항 2/5</span>
+        </div>
+      </div>
+
+      <div class="meeting-card" onclick="openModal('meetingDetail2')">
+        <div class="meeting-top"><span class="meeting-date-badge">03.14 (토)</span></div>
+        <div class="meeting-title">킥오프 미팅 - 신규 프로젝트</div>
+        <div class="meeting-agenda">프로젝트 목표 설정, 역할 분담, 일정 수립, 첫 마일스톤 결정</div>
+        <div class="meeting-footer">
+          <span>👥 참석: 지원, 소영, 슬기</span>
+          <span style="margin-left:auto;">체크사항 3/4</span>
+        </div>
+      </div>
+
+      <div class="meeting-card" onclick="openModal('meetingDetail3')">
+        <div class="meeting-top"><span class="meeting-date-badge">03.07 (토)</span></div>
+        <div class="meeting-title">1분기 KPI 중간점검 회의</div>
+        <div class="meeting-agenda">팀별 KPI 달성률 확인, 하반기 목표 조정 논의</div>
+        <div class="meeting-footer">
+          <span>👥 참석: 지원, 소영, 슬기</span>
+          <span style="margin-left:auto;">체크사항 4/4 ✅</span>
+        </div>
+      </div>
+    </div>
+
     <!-- ── 공지/이벤트 ── -->
     <div class="tab-content" id="tab-notice">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
@@ -831,6 +962,7 @@
     <div class="nav-item active" onclick="navTo('dashboard',this)"><span class="nav-icon">🏠</span>홈</div>
     <div class="nav-item" onclick="navTo('todo',this)"><span class="nav-icon">📋</span>업무</div>
     <div class="nav-item nav-add" onclick="openModal('addModal')"><div class="nav-add-btn">+</div></div>
+    <div class="nav-item" onclick="navTo('meeting',this)"><span class="nav-icon">📝</span>회의록</div>
     <div class="nav-item" onclick="navTo('notice',this)"><span class="nav-icon">📢</span>공지</div>
     <div class="nav-item" onclick="navTo('calendar',this)"><span class="nav-icon">📅</span>캘린더</div>
   </div>
@@ -1002,6 +1134,142 @@
   </div>
 </div>
 
+<!-- ════ 대시보드 상태별 모달 ════ -->
+<div class="modal-overlay" id="dashStatusModal">
+  <div class="modal">
+    <h3 id="dashStatusTitle">긴급 업무</h3>
+    <div class="dash-status-modal-list" id="dashStatusList"></div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeModal('dashStatusModal')">닫기</button></div>
+  </div>
+</div>
+
+<!-- ════ 회의록 상세 모달 1 ════ -->
+<div class="modal-overlay" id="meetingDetail1">
+  <div class="modal meeting-modal">
+    <h3>📝 주간 정기회의 - 3월 3주차</h3>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
+      <span class="meeting-date-badge">2026.03.18 (수) 10:00</span>
+      <span style="font-size:13px;color:#999;">👥 지원, 소영, 슬기</span>
+    </div>
+    <div class="meeting-detail-section">
+      <div class="meeting-detail-label">📋 안건</div>
+      <div class="meeting-detail-content">1. 타임세일 진행 상황 공유
+2. 클라이언트 제안서 마감 일정 논의
+3. 4월 프로모션 기획 아이디어 브레인스토밍
+4. 사은품 이벤트 중간 현황</div>
+    </div>
+    <div class="meeting-detail-section">
+      <div class="meeting-detail-label">📝 논의 내용</div>
+      <div class="meeting-detail-content">- 타임세일 POP 설치 완료, SNS 포스팅은 오늘 중 올리기로
+- 제안서 디자인 소영이 작업 중, 내일까지 1차 완성 예정
+- 4월 프로모션은 "봄맞이 코디 제안" 컨셉으로 진행
+- 사은품 파우치 현재 70% 소진</div>
+    </div>
+    <div class="meeting-detail-section">
+      <div class="meeting-detail-label">✅ 팀원별 체크사항</div>
+      <div class="meeting-action-item"><div class="meeting-action-check mac-checked" onclick="toggleMeetingAction(this)">✓</div><span class="meeting-action-text">매장 POP 최종 점검</span><span class="meeting-action-who">슬기</span></div>
+      <div class="meeting-action-item"><div class="meeting-action-check" onclick="toggleMeetingAction(this)"></div><span class="meeting-action-text">SNS 홍보 포스팅 업로드</span><span class="meeting-action-who">소영</span></div>
+      <div class="meeting-action-item"><div class="meeting-action-check mac-checked" onclick="toggleMeetingAction(this)">✓</div><span class="meeting-action-text">제안서 예산 파트 수정</span><span class="meeting-action-who">지원</span></div>
+      <div class="meeting-action-item"><div class="meeting-action-check" onclick="toggleMeetingAction(this)"></div><span class="meeting-action-text">4월 프로모션 기획안 초안 작성</span><span class="meeting-action-who">소영</span></div>
+      <div class="meeting-action-item"><div class="meeting-action-check" onclick="toggleMeetingAction(this)"></div><span class="meeting-action-text">사은품 추가 발주 검토</span><span class="meeting-action-who">지원</span></div>
+    </div>
+    <div class="modal-btns"><button class="btn-delete">삭제</button><button class="btn-cancel" onclick="closeModal('meetingDetail1')">닫기</button><button class="btn-submit" onclick="closeModal('meetingDetail1')">수정</button></div>
+  </div>
+</div>
+
+<!-- ════ 회의록 상세 모달 2 ════ -->
+<div class="modal-overlay" id="meetingDetail2">
+  <div class="modal meeting-modal">
+    <h3>📝 킥오프 미팅 - 신규 프로젝트</h3>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
+      <span class="meeting-date-badge">2026.03.14 (토) 14:00</span>
+      <span style="font-size:13px;color:#999;">👥 지원, 소영, 슬기</span>
+    </div>
+    <div class="meeting-detail-section">
+      <div class="meeting-detail-label">📋 안건</div>
+      <div class="meeting-detail-content">1. 프로젝트 목표 설정
+2. 역할 분담
+3. 전체 일정 수립
+4. 첫 마일스톤 결정</div>
+    </div>
+    <div class="meeting-detail-section">
+      <div class="meeting-detail-label">📝 논의 내용</div>
+      <div class="meeting-detail-content">- 팀 업무 관리 웹 프로그램 직접 개발하기로 결정
+- 지원: 프로젝트 리더 + 백엔드, 소영: 프론트엔드 + 디자인, 슬기: 인프라 + 테스트
+- 3월 내 프로토타입 완성 목표
+- 첫 마일스톤: 3/21 요구사항 정리 완료</div>
+    </div>
+    <div class="meeting-detail-section">
+      <div class="meeting-detail-label">✅ 팀원별 체크사항</div>
+      <div class="meeting-action-item"><div class="meeting-action-check mac-checked" onclick="toggleMeetingAction(this)">✓</div><span class="meeting-action-text">요구사항 문서 각자 작성</span><span class="meeting-action-who">전체</span></div>
+      <div class="meeting-action-item"><div class="meeting-action-check mac-checked" onclick="toggleMeetingAction(this)">✓</div><span class="meeting-action-text">기술 스택 조사</span><span class="meeting-action-who">슬기</span></div>
+      <div class="meeting-action-item"><div class="meeting-action-check mac-checked" onclick="toggleMeetingAction(this)">✓</div><span class="meeting-action-text">UI 레퍼런스 수집</span><span class="meeting-action-who">소영</span></div>
+      <div class="meeting-action-item"><div class="meeting-action-check" onclick="toggleMeetingAction(this)"></div><span class="meeting-action-text">DB 구조 초안 설계</span><span class="meeting-action-who">지원</span></div>
+    </div>
+    <div class="modal-btns"><button class="btn-delete">삭제</button><button class="btn-cancel" onclick="closeModal('meetingDetail2')">닫기</button><button class="btn-submit" onclick="closeModal('meetingDetail2')">수정</button></div>
+  </div>
+</div>
+
+<!-- ════ 회의록 상세 모달 3 ════ -->
+<div class="modal-overlay" id="meetingDetail3">
+  <div class="modal meeting-modal">
+    <h3>📝 1분기 KPI 중간점검 회의</h3>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
+      <span class="meeting-date-badge">2026.03.07 (토) 10:00</span>
+      <span style="font-size:13px;color:#999;">👥 지원, 소영, 슬기</span>
+    </div>
+    <div class="meeting-detail-section">
+      <div class="meeting-detail-label">📋 안건</div>
+      <div class="meeting-detail-content">1. 팀별 KPI 달성률 확인
+2. 하반기 목표 조정 논의</div>
+    </div>
+    <div class="meeting-detail-section">
+      <div class="meeting-detail-label">📝 논의 내용</div>
+      <div class="meeting-detail-content">- 1분기 매출 목표 대비 92% 달성 중
+- SNS 팔로워 증가율 목표 초과 달성
+- 고객 만족도 설문 결과 4.2/5.0
+- 2분기에는 온라인 채널 강화에 집중하기로</div>
+    </div>
+    <div class="meeting-detail-section">
+      <div class="meeting-detail-label">✅ 팀원별 체크사항</div>
+      <div class="meeting-action-item"><div class="meeting-action-check mac-checked" onclick="toggleMeetingAction(this)">✓</div><span class="meeting-action-text">1분기 실적 보고서 최종 정리</span><span class="meeting-action-who">지원</span></div>
+      <div class="meeting-action-item"><div class="meeting-action-check mac-checked" onclick="toggleMeetingAction(this)">✓</div><span class="meeting-action-text">SNS 분석 리포트 작성</span><span class="meeting-action-who">소영</span></div>
+      <div class="meeting-action-item"><div class="meeting-action-check mac-checked" onclick="toggleMeetingAction(this)">✓</div><span class="meeting-action-text">서버 성능 리포트 정리</span><span class="meeting-action-who">슬기</span></div>
+      <div class="meeting-action-item"><div class="meeting-action-check mac-checked" onclick="toggleMeetingAction(this)">✓</div><span class="meeting-action-text">2분기 KPI 목표 초안</span><span class="meeting-action-who">지원</span></div>
+    </div>
+    <div class="modal-btns"><button class="btn-delete">삭제</button><button class="btn-cancel" onclick="closeModal('meetingDetail3')">닫기</button><button class="btn-submit" onclick="closeModal('meetingDetail3')">수정</button></div>
+  </div>
+</div>
+
+<!-- ════ 회의록 작성 모달 ════ -->
+<div class="modal-overlay" id="meetingAddModal">
+  <div class="modal meeting-modal">
+    <h3>📝 회의록 작성</h3>
+    <label>회의 제목</label><input type="text" placeholder="회의 제목을 입력하세요">
+    <label>회의 날짜</label><input type="date" value="2026-03-18">
+    <label>참석자</label>
+    <div class="assignee-chips"><div class="assignee-chip selected" onclick="toggleAssignee(this)">지원</div><div class="assignee-chip selected" onclick="toggleAssignee(this)">소영</div><div class="assignee-chip selected" onclick="toggleAssignee(this)">슬기</div></div>
+    <label>안건</label><textarea placeholder="1. 첫 번째 안건&#10;2. 두 번째 안건&#10;3. 세 번째 안건"></textarea>
+    <label>논의 내용</label><textarea class="notice-content-area" placeholder="회의에서 논의된 내용을 정리하세요" style="min-height:150px;"></textarea>
+    <label>팀원별 체크사항</label>
+    <div style="margin-top:4px;">
+      <div style="display:flex;gap:8px;margin-bottom:6px;"><input type="text" placeholder="체크사항 내용" style="flex:1;"><select style="padding:8px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:13px;"><option>지원</option><option>소영</option><option>슬기</option><option>전체</option></select></div>
+      <button style="background:none;border:1px dashed #ddd;padding:8px 16px;border-radius:8px;color:#999;cursor:pointer;font-size:13px;width:100%;">+ 체크사항 추가</button>
+    </div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeModal('meetingAddModal')">취소</button><button class="btn-submit" onclick="closeModal('meetingAddModal')">등록</button></div>
+  </div>
+</div>
+
+<!-- ════ 메모 작성 모달 ════ -->
+<div class="modal-overlay" id="memoAddModal">
+  <div class="modal">
+    <h3>📒 메모 작성</h3>
+    <label>제목</label><input type="text" placeholder="메모 제목">
+    <label>내용</label><textarea placeholder="메모 내용을 입력하세요" style="min-height:120px;"></textarea>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeModal('memoAddModal')">취소</button><button class="btn-submit" onclick="closeModal('memoAddModal')">저장</button></div>
+  </div>
+</div>
+
 <script>
 let currentUser = null;
 
@@ -1014,6 +1282,7 @@ function login(name, id) {
   const av = document.getElementById('headerAvatar');
   av.textContent = name[0]; av.className = 'avatar-sm av-' + id;
   renderCalendar(2026, 2);
+  if (typeof renderPW === 'function') renderPW();
 }
 
 function logout() {
@@ -1212,6 +1481,147 @@ document.addEventListener('click', function(e) {
   if (!e.target.closest('.notif-btn') && !e.target.closest('.notif-panel'))
     document.getElementById('notifPanel').classList.remove('show');
 });
+
+// ── 대시보드 상태별 모달 ──
+const dashStatusData = {
+  urgent: {
+    title: '🔴 긴급 업무 (2건)',
+    items: [
+      { title: '클라이언트 제안서 수정', tag: '마감 지남', tagClass: 'tag-overdue', who: '지원, 소영' },
+      { title: '3월 예산안 최종 확인', tag: '03.19 마감', tagClass: 'tag-deadline', who: '지원' },
+    ]
+  },
+  progress: {
+    title: '🟡 진행중 업무 (3건)',
+    items: [
+      { title: '클라이언트 제안서 수정', tag: '긴급', tagClass: 'tag-overdue', who: '지원, 소영' },
+      { title: '회의실 예약 시스템 리서치', tag: '03.21', tagClass: 'tag-deadline', who: '지원, 슬기' },
+      { title: 'SNS 콘텐츠 3월분 제작', tag: '03.20', tagClass: 'tag-deadline', who: '소영' },
+    ]
+  },
+  today: {
+    title: '📋 오늘 할 일 (5건)',
+    items: [
+      { title: '클라이언트 제안서 수정', tag: '마감 지남!', tagClass: 'tag-overdue', who: '지원, 소영' },
+      { title: '3월 예산안 최종 확인', tag: '내일 마감', tagClass: 'tag-deadline', who: '지원' },
+      { title: '회의실 예약 시스템 리서치', tag: '03.21', tagClass: 'tag-deadline', who: '슬기' },
+      { title: '주간보고 작성', tag: '고정 업무', tagClass: 'tag-memo', who: '지원' },
+      { title: '타임세일 POP 점검', tag: '오늘', tagClass: 'tag-deadline', who: '슬기' },
+    ]
+  },
+  done: {
+    title: '✅ 이달 완료 (12건)',
+    items: [
+      { title: '2월 실적 보고서 작성', tag: '03.15', tagClass: 'tag-deadline', who: '지원' },
+      { title: '신규 프로젝트 킥오프 미팅', tag: '03.14', tagClass: 'tag-deadline', who: '전체' },
+      { title: '거래처 계약서 검토', tag: '03.12', tagClass: 'tag-deadline', who: '지원' },
+      { title: 'SNS 2월 결산 리포트', tag: '03.11', tagClass: 'tag-deadline', who: '소영' },
+      { title: '팀 회식 장소 예약', tag: '03.10', tagClass: 'tag-deadline', who: '슬기' },
+      { title: '1분기 KPI 중간점검', tag: '03.07', tagClass: 'tag-deadline', who: '전체' },
+    ]
+  }
+};
+
+function openDashStatus(type) {
+  const data = dashStatusData[type];
+  document.getElementById('dashStatusTitle').textContent = data.title;
+  let html = '';
+  data.items.forEach(item => {
+    const dotColor = type === 'urgent' ? '#dc2626' : type === 'progress' ? '#f59e0b' : type === 'today' ? '#667eea' : '#22c55e';
+    html += '<div class="dash-status-item"><div class="dash-status-dot" style="background:' + dotColor + '"></div><span class="dash-status-title">' + item.title + '</span><span class="dash-status-tag ' + item.tagClass + '">' + item.tag + '</span><span style="font-size:11px;color:#999;">' + item.who + '</span></div>';
+  });
+  document.getElementById('dashStatusList').innerHTML = html;
+  openModal('dashStatusModal');
+}
+
+// ── 개인 주간 캘린더 ──
+let pwWeekOffset = 0;
+
+const fixedTasks = [
+  { day: 1, title: '주간보고 작성', fixed: true },
+  { day: 3, title: '팀 미팅 준비', fixed: true },
+  { day: 5, title: '주간 정산', fixed: true },
+];
+
+const weekTasks = {
+  '2026-03-16': [{ title: '제안서 수정 마감', urgent: true }],
+  '2026-03-17': [{ title: '거래처 미팅' }],
+  '2026-03-18': [{ title: '팀 주간회의' }, { title: '타임세일 시작' }],
+  '2026-03-19': [{ title: '예산안 최종 확인', urgent: true }],
+  '2026-03-20': [{ title: 'SNS 콘텐츠 제작' }],
+  '2026-03-23': [{ title: '월간 정기회의 준비' }],
+  '2026-03-25': [{ title: '보고서 양식 정리' }],
+};
+
+function getMonday(offset) {
+  const d = new Date(2026, 2, 18); // 2026-03-18 (Wed) as reference "today"
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const mon = new Date(d.setDate(diff));
+  mon.setDate(mon.getDate() + offset * 7);
+  return mon;
+}
+
+function renderPW() {
+  const mon = getMonday(pwWeekOffset);
+  const fri = new Date(mon); fri.setDate(fri.getDate() + 4);
+  const label = (mon.getMonth()+1) + '/' + mon.getDate() + ' ~ ' + (fri.getMonth()+1) + '/' + fri.getDate();
+  document.getElementById('pwLabel').textContent = label;
+
+  const grid = document.getElementById('pwGrid');
+  grid.innerHTML = '';
+  const dayNames = ['월','화','수','목','금'];
+  const todayStr = '2026-03-18';
+
+  for (let i = 0; i < 5; i++) {
+    const date = new Date(mon);
+    date.setDate(date.getDate() + i);
+    const dateStr = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0');
+    const isToday = dateStr === todayStr;
+    const dayNum = date.getDay(); // 1=Mon...5=Fri
+
+    let html = '<div class="pw-day' + (isToday ? ' pw-today' : '') + '">';
+    html += '<div class="pw-day-header"><span>' + dayNames[i] + '</span><span class="pw-date">' + date.getDate() + '</span></div>';
+
+    // Fixed tasks for this day of week
+    fixedTasks.forEach(ft => {
+      if (ft.day === dayNum) {
+        html += '<div class="pw-task-item pw-fixed"><div class="pw-task-check" onclick="event.stopPropagation();this.classList.toggle(\'pw-checked\');this.textContent=this.classList.contains(\'pw-checked\')?\'✓\':\'\';">​</div><span class="pw-task-label">🔁 ' + ft.title + '</span></div>';
+      }
+    });
+
+    // Regular tasks
+    if (weekTasks[dateStr]) {
+      weekTasks[dateStr].forEach(t => {
+        const cls = t.urgent ? 'pw-urgent' : 'pw-normal';
+        html += '<div class="pw-task-item ' + cls + '"><span class="pw-task-label">' + t.title + '</span></div>';
+      });
+    }
+
+    html += '</div>';
+    grid.innerHTML += html;
+  }
+}
+
+function changePW(d) { pwWeekOffset += d; renderPW(); }
+
+// ── 회의록 체크 ──
+function toggleMeetingAction(el) {
+  el.classList.toggle('mac-checked');
+  el.textContent = el.classList.contains('mac-checked') ? '✓' : '';
+}
+
+// ── 메모 검색 ──
+function filterMemos(input) {
+  const q = input.value.toLowerCase();
+  document.querySelectorAll('#memoList .memo-card-item').forEach(c => {
+    const title = (c.getAttribute('data-title') || '').toLowerCase();
+    const content = (c.getAttribute('data-content') || '').toLowerCase();
+    c.style.display = (title.includes(q) || content.includes(q)) ? 'block' : 'none';
+  });
+}
+
+
 </script>
 </body>
 </html>
