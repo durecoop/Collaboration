@@ -1580,9 +1580,9 @@ async function login(name, id) {
   buildTeamToolbar();
   buildCalFilters();
   buildRecurringUserFilter();
-  buildAssigneeChips('addTaskAssignees');
+  buildAssigneeChips('addTaskAssignees', [currentUser.name]);
   buildAssigneeChips('addMeetingAttendees', USERS.map(u => u.name));
-  buildAssigneeChips('addRecurringAssignees');
+  buildAssigneeChips('addRecurringAssignees', [currentUser.name]);
   const meetingCheckSelect0 = document.getElementById('meetingCheckWho0');
   if (meetingCheckSelect0) buildMeetingWhoSelect(meetingCheckSelect0);
   updateHeaderProfile();
