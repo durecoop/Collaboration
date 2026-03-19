@@ -52,12 +52,13 @@
 
 ## 서버 배포 방법
 - 배포 서버: https://durecoop-team.onrender.com/
-- Render가 GitHub `master` 브랜치와 연동되어 있음
-- **master에 push하면 자동으로 서버에 배포됩니다**
+- Render에서 호스팅 중 (GitHub `master` 브랜치 연동)
+- **배포 방법**: master에 push 후, Claude에게 "서버에 반영해줘" 라고 말하기
+- Claude는 `.env` 파일의 `RENDER_DEPLOY_HOOK` URL을 curl로 호출하여 배포 트리거
 - 배포가 안 될 때 확인사항:
   1. 내 작업이 `master` 브랜치에 머지/푸시되었는지 확인
   2. feature 브랜치에만 push하면 배포 안 됨 → master에 머지 필요
-  3. Claude에게 "서버에 반영해줘" 라고 말하면 됩니다
+  3. `.env` 파일이 있는지 확인 (`.gitignore`에 포함되어 Git에는 올라가지 않음)
 
 ## 주의사항
 - 작업 시작 전에 반드시 pull 먼저!
