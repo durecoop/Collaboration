@@ -300,6 +300,7 @@
     .cal-filter-chip.cf-meeting.active { border-color: #f59e0b; background: #fef3c7; color: #d97706; }
     .cal-filter-chip.cf-leave.active { border-color: #22c55e; background: #c8e6c9; color: #2e7d32; }
     .cal-filter-chip.cf-event.active { border-color: #7c3aed; background: #ede9fe; color: #7c3aed; }
+    .cal-filter-chip.cf-promo.active { border-color: #db2777; background: #fce7f3; color: #db2777; }
     .cal-filter-divider { width: 1px; height: 24px; background: #e0e0e0; margin: 0 6px; }
     .calendar { background: #fff; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; }
     .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); background: #f9fafb; }
@@ -331,6 +332,7 @@
     .cal-event.ev-meeting { background: #fef3c7; color: #d97706; }
     .cal-event.ev-leave { background: #c8e6c9; color: #2e7d32; }
     .cal-event.ev-event { background: #ede9fe; color: #7c3aed; }
+    .cal-event.ev-promo { background: #fce7f3; color: #db2777; }
     .cal-event.ev-done { background: #f3f4f6; color: #999; text-decoration: line-through; }
     .cal-more { font-size: 10px; color: #999; padding: 2px 0; cursor: pointer; }
     .cal-more:hover { color: #155940; }
@@ -350,7 +352,7 @@
     .cal-sel-task:last-child { border-bottom: none; }
     .cst-priority { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .cst-task { background: #dc2626; } .cst-meeting { background: #f59e0b; }
-    .cst-leave { background: #22c55e; } .cst-event { background: #7c3aed; }
+    .cst-leave { background: #22c55e; } .cst-event { background: #7c3aed; } .cst-promo { background: #db2777; }
     .cst-title { font-size: 14px; color: #333; flex: 1; }
     .cst-assignee { font-size: 12px; color: #999; }
     .cst-type { font-size: 10px; padding: 2px 8px; border-radius: 10px; }
@@ -358,6 +360,7 @@
     .cst-type-meeting { background: #fef3c7; color: #d97706; }
     .cst-type-leave { background: #c8e6c9; color: #2e7d32; }
     .cst-type-event { background: #ede9fe; color: #7c3aed; }
+    .cst-type-promo { background: #fce7f3; color: #db2777; }
 
     /* ── 팀 업무 ── */
     .team-toolbar { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
@@ -916,6 +919,7 @@
                 <button class="cal-nav-btn" onclick="changeCalMonth(1)">▶</button>
               </div>
               <button class="cal-today-btn" onclick="goToday()">오늘</button>
+              <button class="cal-today-btn" onclick="openModal('promoScheduleModal')" style="background:#db2777;">📢 홍보 스케줄</button>
             </div>
             <div class="cal-view-toggle">
               <button class="cal-view-btn active" onclick="switchCalView('month',this)">월간</button>
@@ -1138,6 +1142,37 @@
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal('editModal')">취소</button>
       <button class="btn-submit" onclick="updateTask()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 홍보 스케줄 모달 ════ -->
+<div class="modal-overlay" id="promoScheduleModal">
+  <div class="modal">
+    <h3>📢 홍보 스케줄 등록</h3>
+    <label>품목명</label><input type="text" id="promoItemName" placeholder="예: 정규연 토마토, 친환경 사과">
+    <label>홍보 채널 (복수 선택 가능)</label>
+    <div class="priority-selector" id="promoChannel" style="flex-wrap:wrap;">
+      <div class="priority-option" onclick="togglePromoChannel(this,'RCS')">📩 RCS</div>
+      <div class="priority-option" onclick="togglePromoChannel(this,'앱푸시')">🔔 앱푸시</div>
+      <div class="priority-option" onclick="togglePromoChannel(this,'카카오톡')">💬 카카오톡</div>
+      <div class="priority-option" onclick="togglePromoChannel(this,'LMS')">📝 LMS</div>
+    </div>
+    <label>홍보 기간</label>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="date" id="promoStartDate" style="flex:1;"> <span style="color:#999;font-weight:600;">~</span> <input type="date" id="promoEndDate" style="flex:1;">
+    </div>
+    <label>발송 시간</label>
+    <input type="time" id="promoSendTime" style="width:140px;">
+    <label>담당자</label>
+    <div class="assignee-chips" id="promoAssignees"></div>
+    <label>메모</label>
+    <textarea id="promoMemo" placeholder="홍보 관련 참고사항을 적어주세요" style="min-height:80px;"></textarea>
+    <label style="margin-top:12px;">세팅 완료 체크</label>
+    <div id="promoSettingChecks" style="display:flex;flex-direction:column;gap:8px;margin-top:4px;"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('promoScheduleModal')">취소</button>
+      <button class="btn-submit" onclick="savePromoSchedule()" style="background:#db2777;">등록</button>
     </div>
   </div>
 </div>
@@ -1611,6 +1646,7 @@ function buildCalFilters() {
   html += '<div class="cal-filter-chip cf-meeting active" onclick="toggleCalFilter(this)">🟡 회의</div>';
   html += '<div class="cal-filter-chip cf-leave active" onclick="toggleCalFilter(this)">🟢 연차</div>';
   html += '<div class="cal-filter-chip cf-event active" onclick="toggleCalFilter(this)">🟣 이벤트</div>';
+  html += '<div class="cal-filter-chip cf-promo active" onclick="toggleCalFilter(this)">📢 홍보</div>';
   html += '<div class="cal-filter-divider"></div>';
   html += '<span class="cal-filter-label">팀원</span>';
   html += '<div class="cal-filter-chip active" onclick="toggleCalFilter(this)" style="border-color:#155940;background:#d4edda;color:#155940;">전체</div>';
@@ -2030,10 +2066,10 @@ async function kDrop(e, status) {
 }
 
 // ── 캘린더 ──
-const catClass = { task: 'ev-task', meeting: 'ev-meeting', leave: 'ev-leave', event: 'ev-event', done: 'ev-done' };
-const cstClass = { task: 'cst-task', meeting: 'cst-meeting', leave: 'cst-leave', event: 'cst-event', done: 'cst-task' };
-const typeLabel = { task: '업무', meeting: '회의', leave: '연차', event: '이벤트', done: '완료' };
-const typeBadge = { task: 'cst-type-task', meeting: 'cst-type-meeting', leave: 'cst-type-leave', event: 'cst-type-event', done: 'cst-type-task' };
+const catClass = { task: 'ev-task', meeting: 'ev-meeting', leave: 'ev-leave', event: 'ev-event', promo: 'ev-promo', done: 'ev-done' };
+const cstClass = { task: 'cst-task', meeting: 'cst-meeting', leave: 'cst-leave', event: 'cst-event', promo: 'cst-promo', done: 'cst-task' };
+const typeLabel = { task: '업무', meeting: '회의', leave: '연차', event: '이벤트', promo: '홍보', done: '완료' };
+const typeBadge = { task: 'cst-type-task', meeting: 'cst-type-meeting', leave: 'cst-type-leave', event: 'cst-type-event', promo: 'cst-type-promo', done: 'cst-type-task' };
 let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
 
 function changeCalMonth(d) {
@@ -3066,6 +3102,78 @@ async function saveTask() {
   document.querySelectorAll('#addTaskAssignees .assignee-chip').forEach(e => e.classList.remove('selected'));
 }
 
+// ── 홍보 스케줄 ──
+let selectedPromoChannels = new Set();
+function togglePromoChannel(el, val) {
+  if (selectedPromoChannels.has(val)) {
+    selectedPromoChannels.delete(val);
+    el.style.borderColor = '#e0e0e0'; el.style.background = '#fff'; el.style.color = '#666';
+  } else {
+    selectedPromoChannels.add(val);
+    el.style.borderColor = '#db2777'; el.style.background = '#fce7f3'; el.style.color = '#db2777';
+  }
+  buildPromoSettingChecks();
+}
+
+function buildPromoSettingChecks() {
+  const container = document.getElementById('promoSettingChecks');
+  const channels = [...selectedPromoChannels];
+  if (channels.length === 0) { container.innerHTML = '<span style="color:#aaa;font-size:13px;">채널을 선택하면 세팅 체크리스트가 표시됩니다</span>'; return; }
+  container.innerHTML = channels.map(ch => `
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 12px;background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb;">
+      <input type="checkbox" class="promo-setting-check" data-channel="${ch}" style="width:18px;height:18px;accent-color:#db2777;">
+      <span style="font-size:14px;color:#333;">${ch} 세팅 완료</span>
+    </label>
+  `).join('');
+}
+
+async function savePromoSchedule() {
+  const item = document.getElementById('promoItemName').value.trim();
+  if (!item) return alert('품목명을 입력하세요');
+  const startDate = document.getElementById('promoStartDate').value;
+  const endDate = document.getElementById('promoEndDate').value;
+  if (!startDate) return alert('홍보 시작일을 선택하세요');
+  const channels = [...selectedPromoChannels];
+  const sendTime = document.getElementById('promoSendTime').value || '';
+  const assignees = [...document.querySelectorAll('#promoAssignees .assignee-chip.selected')].map(e => e.textContent);
+  const memo = document.getElementById('promoMemo').value.trim();
+  const settingStatus = {};
+  document.querySelectorAll('.promo-setting-check').forEach(cb => { settingStatus[cb.dataset.channel] = cb.checked; });
+
+  const channelStr = channels.length ? channels.join('/') : '';
+  const timeStr = sendTime ? ` ${sendTime}` : '';
+  const title = `[홍보] ${item}` + (channelStr ? ` (${channelStr})` : '') + timeStr;
+
+  // 시작~종료 날짜 범위의 각 날에 캘린더 이벤트 등록
+  const dates = [];
+  if (endDate && endDate >= startDate) {
+    let d = new Date(startDate);
+    const end = new Date(endDate);
+    while (d <= end) { dates.push(d.toISOString().slice(0, 10)); d.setDate(d.getDate() + 1); }
+  } else {
+    dates.push(startDate);
+  }
+
+  for (const date of dates) {
+    const ev = await api.post('/api/calendar', { date, title, cat: 'promo', who: assignees.join(', ') });
+    appData.calendarEvents.push(ev);
+  }
+
+  closeModal('promoScheduleModal');
+  renderAll();
+
+  // 입력 초기화
+  document.getElementById('promoItemName').value = '';
+  document.getElementById('promoStartDate').value = '';
+  document.getElementById('promoEndDate').value = '';
+  document.getElementById('promoSendTime').value = '';
+  document.getElementById('promoMemo').value = '';
+  selectedPromoChannels.clear();
+  document.querySelectorAll('#promoChannel .priority-option').forEach(e => { e.style.borderColor = '#e0e0e0'; e.style.background = '#fff'; e.style.color = '#666'; });
+  document.querySelectorAll('#promoAssignees .assignee-chip').forEach(e => e.classList.remove('selected'));
+  document.getElementById('promoSettingChecks').innerHTML = '';
+}
+
 async function saveNotice() {
   const title = document.getElementById('addNoticeTitle').value.trim();
   if (!title) return alert('공지 제목을 입력하세요');
@@ -3149,6 +3257,15 @@ function openModal(id) {
     const today = getToday();
     document.getElementById('addTaskStartDate').value = today;
     document.getElementById('addTaskEndDate').value = today;
+  }
+  if (id === 'promoScheduleModal') {
+    const today = getToday();
+    document.getElementById('promoStartDate').value = today;
+    document.getElementById('promoSendTime').value = '10:00';
+    buildAssigneeChips('promoAssignees', [currentUser?.name || '']);
+    selectedPromoChannels.clear();
+    document.querySelectorAll('#promoChannel .priority-option').forEach(e => { e.style.borderColor = '#e0e0e0'; e.style.background = '#fff'; e.style.color = '#666'; });
+    buildPromoSettingChecks();
   }
 }
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
