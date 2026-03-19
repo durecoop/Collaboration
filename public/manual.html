@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사용 설명서 - 두레생협 팀 업무 관리</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body {
+      font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      background: #f8faf9; color: #333; line-height: 1.7; font-size: 16px;
+    }
+
+    /* ── Color Variables ── */
+    :root {
+      --primary: #155940;
+      --primary-light: #e8f5ee;
+      --primary-dark: #0d3d2b;
+      --accent: #3e6042;
+      --orange: #ff8f00;
+      --bg: #f8faf9;
+      --card: #ffffff;
+      --text: #333333;
+      --text-light: #666666;
+      --border: #e0e6e3;
+      --sidebar-w: 260px;
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: var(--primary); color: #fff; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .topbar-title { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .topbar-title span { font-size: 22px; }
+    .topbar-link {
+      color: #fff; text-decoration: none; font-size: 14px; font-weight: 500;
+      background: rgba(255,255,255,0.15); padding: 6px 16px; border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .topbar-link:hover { background: rgba(255,255,255,0.25); }
+    .hamburger {
+      display: none; background: none; border: none; color: #fff;
+      font-size: 24px; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+    }
+    .hamburger:hover { background: rgba(255,255,255,0.15); }
+
+    /* ── Layout ── */
+    .layout { display: flex; margin-top: 56px; min-height: calc(100vh - 56px); }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed; top: 56px; left: 0; bottom: 0; width: var(--sidebar-w);
+      background: var(--card); border-right: 1px solid var(--border);
+      overflow-y: auto; padding: 20px 0; z-index: 90;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-heading {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      color: #999; padding: 16px 20px 8px; margin-top: 8px;
+    }
+    .sidebar-heading:first-child { margin-top: 0; padding-top: 4px; }
+    .sidebar a {
+      display: flex; align-items: center; gap: 10px; padding: 9px 20px;
+      color: var(--text-light); text-decoration: none; font-size: 14px;
+      border-left: 3px solid transparent; transition: all 0.15s;
+    }
+    .sidebar a:hover { background: var(--primary-light); color: var(--primary); border-left-color: var(--primary); }
+    .sidebar a.active { background: var(--primary-light); color: var(--primary); font-weight: 600; border-left-color: var(--primary); }
+    .sidebar a .icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+    .sidebar-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 85;
+    }
+
+    /* ── Main Content ── */
+    .main { margin-left: var(--sidebar-w); flex: 1; padding: 40px 48px 80px; max-width: 900px; }
+
+    /* ── Section ── */
+    .section { margin-bottom: 56px; }
+    .section-title {
+      font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 8px;
+      padding-bottom: 12px; border-bottom: 3px solid var(--primary);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-title .icon { font-size: 28px; }
+    .section-desc { color: var(--text-light); font-size: 15px; margin-bottom: 24px; }
+
+    /* ── Subsection ── */
+    h3 {
+      font-size: 20px; font-weight: 700; color: var(--text); margin: 28px 0 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    h4 { font-size: 16px; font-weight: 600; color: var(--text); margin: 16px 0 8px; }
+
+    /* ── Paragraphs & Lists ── */
+    p { margin-bottom: 12px; }
+    ul, ol { margin: 8px 0 16px 24px; }
+    li { margin-bottom: 6px; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px 24px; margin: 16px 0;
+    }
+
+    /* ── AI Tip Box ── */
+    .ai-tip {
+      background: linear-gradient(135deg, #e8f5ee, #dff0e7);
+      border-left: 4px solid var(--primary); border-radius: 0 12px 12px 0;
+      padding: 16px 20px; margin: 16px 0; position: relative;
+    }
+    .ai-tip::before { content: ''; }
+    .ai-tip-label {
+      font-weight: 700; color: var(--primary); font-size: 14px;
+      margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+    }
+    .ai-tip p { font-size: 14px; color: #2a5a3a; margin-bottom: 6px; }
+    .ai-tip p:last-child { margin-bottom: 0; }
+
+    /* ── Info Box ── */
+    .info-box {
+      background: #fff8e1; border-left: 4px solid var(--orange);
+      border-radius: 0 12px 12px 0; padding: 16px 20px; margin: 16px 0;
+    }
+    .info-box-label { font-weight: 700; color: #e65100; font-size: 14px; margin-bottom: 6px; }
+    .info-box p { font-size: 14px; color: #5d4037; margin-bottom: 0; }
+
+    /* ── Keyboard Shortcut ── */
+    kbd {
+      display: inline-block; background: #f4f4f4; border: 1px solid #ccc;
+      border-radius: 5px; padding: 2px 8px; font-size: 13px; font-family: 'Consolas', 'Monaco', monospace;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1); color: #333; white-space: nowrap;
+      vertical-align: middle; line-height: 1.6;
+    }
+
+    /* ── Shortcut Grid ── */
+    .shortcut-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px; margin: 16px 0;
+    }
+    .shortcut-item {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 16px;
+    }
+    .shortcut-item kbd { flex-shrink: 0; min-width: 36px; text-align: center; }
+    .shortcut-item span { font-size: 14px; color: var(--text); }
+
+    /* ── Steps ── */
+    .steps { counter-reset: step; list-style: none; margin-left: 0; padding-left: 0; }
+    .steps li {
+      counter-increment: step; position: relative; padding-left: 48px; margin-bottom: 20px;
+      min-height: 36px; display: flex; align-items: flex-start; flex-direction: column;
+    }
+    .steps li::before {
+      content: counter(step); position: absolute; left: 0; top: 0;
+      width: 32px; height: 32px; background: var(--primary); color: #fff;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px;
+    }
+    .steps li strong { color: var(--primary); }
+
+    /* ── Screenshot placeholder ── */
+    .screenshot {
+      background: #eef2f0; border: 2px dashed #c5d1cb; border-radius: 12px;
+      padding: 32px; text-align: center; color: #88a096; font-size: 14px;
+      margin: 16px 0;
+    }
+    .screenshot .icon { font-size: 28px; display: block; margin-bottom: 8px; }
+
+    /* ── Table ── */
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+    th { background: var(--primary); color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; }
+    th:first-child { border-radius: 8px 0 0 0; }
+    th:last-child { border-radius: 0 8px 0 0; }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    tr:last-child td:first-child { border-radius: 0 0 0 8px; }
+    tr:last-child td:last-child { border-radius: 0 0 8px 0; }
+    tr:hover td { background: var(--primary-light); }
+
+    /* ── Badge ── */
+    .badge {
+      display: inline-block; padding: 2px 10px; border-radius: 12px;
+      font-size: 12px; font-weight: 600; vertical-align: middle;
+    }
+    .badge-urgent { background: #fbe9e7; color: #d84315; }
+    .badge-normal { background: #e8f5ee; color: var(--primary); }
+    .badge-done { background: #e0e0e0; color: #616161; }
+
+    /* ── Back to Top ── */
+    .back-to-top {
+      position: fixed; bottom: 24px; right: 24px; z-index: 80;
+      width: 44px; height: 44px; border-radius: 50%; border: none;
+      background: var(--primary); color: #fff; font-size: 20px; cursor: pointer;
+      box-shadow: 0 4px 12px rgba(21,89,64,0.3); transition: opacity 0.3s, transform 0.3s;
+      opacity: 0; transform: translateY(10px); pointer-events: none;
+    }
+    .back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .back-to-top:hover { background: var(--primary-dark); }
+
+    /* ── Footer ── */
+    .footer {
+      margin-left: var(--sidebar-w); padding: 24px 48px; text-align: center;
+      color: #999; font-size: 13px; border-top: 1px solid var(--border);
+    }
+
+    /* ── Print ── */
+    @media print {
+      .topbar, .sidebar, .sidebar-overlay, .back-to-top, .hamburger { display: none !important; }
+      .main { margin-left: 0; padding: 20px; max-width: 100%; }
+      .footer { margin-left: 0; }
+      .section { page-break-inside: avoid; }
+      body { background: #fff; font-size: 12pt; }
+      .ai-tip, .info-box, .card { break-inside: avoid; }
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); width: 280px; }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; }
+      .main { margin-left: 0; padding: 24px 20px 60px; }
+      .footer { margin-left: 0; padding: 24px 20px; }
+      .hamburger { display: block; }
+      .section-title { font-size: 22px; }
+      h3 { font-size: 18px; }
+      .shortcut-grid { grid-template-columns: 1fr; }
+      .topbar-link { font-size: 13px; padding: 5px 12px; }
+    }
+
+    /* ── User Chips ── */
+    .user-chip {
+      display: inline-flex; align-items: center; gap: 4px; background: #f0f0f0;
+      padding: 2px 10px 2px 6px; border-radius: 16px; font-size: 13px; font-weight: 500;
+      white-space: nowrap;
+    }
+    .user-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── Feature List ── */
+    .feature-list { list-style: none; margin: 0; padding: 0; }
+    .feature-list li {
+      padding: 10px 16px; border-left: 3px solid var(--border); margin-bottom: 8px;
+      background: #fafcfb; border-radius: 0 8px 8px 0;
+    }
+    .feature-list li strong { color: var(--primary); }
+  </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="메뉴">&#9776;</button>
+    <div class="topbar-title"><span>&#127793;</span> 두레생협 팀 업무 관리 - 사용 설명서</div>
+  </div>
+  <a href="https://durecoop-team.onrender.com" class="topbar-link">&#8592; 앱으로 돌아가기</a>
+</header>
+
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar Navigation -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-heading">시작</div>
+  <a href="#start"><span class="icon">&#128640;</span> 시작하기</a>
+  <a href="#dashboard"><span class="icon">&#128202;</span> 대시보드</a>
+
+  <div class="sidebar-heading">업무</div>
+  <a href="#task"><span class="icon">&#9989;</span> 업무 관리</a>
+  <a href="#weekly"><span class="icon">&#128197;</span> 주간 일정</a>
+  <a href="#calendar"><span class="icon">&#128467;</span> 캘린더</a>
+  <a href="#recurring"><span class="icon">&#128260;</span> 반복 업무</a>
+
+  <div class="sidebar-heading">소통</div>
+  <a href="#meeting"><span class="icon">&#128221;</span> 회의록</a>
+  <a href="#notice"><span class="icon">&#128227;</span> 공지</a>
+  <a href="#memo"><span class="icon">&#128196;</span> 내 메모</a>
+
+  <div class="sidebar-heading">목표 & AI</div>
+  <a href="#goal"><span class="icon">&#127919;</span> 팀 목표</a>
+  <a href="#ai"><span class="icon">&#129302;</span> AI 어시스턴트</a>
+  <a href="#shortcuts"><span class="icon">&#9000;</span> 단축키</a>
+  <a href="#tips"><span class="icon">&#128161;</span> AI 활용 팁</a>
+</nav>
+
+<!-- Main Content -->
+<div class="layout">
+<main class="main">
+
+  <!-- ============================================ -->
+  <!-- 시작하기 -->
+  <!-- ============================================ -->
+  <section class="section" id="start">
+    <h2 class="section-title"><span class="icon">&#128640;</span> 시작하기</h2>
+    <p class="section-desc">두레생협 팀 업무 관리 시스템에 처음 접속하는 방법을 안내합니다.</p>
+
+    <h3>&#127760; 접속 방법</h3>
+    <p>웹 브라우저(Chrome, Safari, Edge 등)에서 아래 주소로 접속하세요.</p>
+    <div class="card" style="text-align:center;">
+      <a href="https://durecoop-team.onrender.com" target="_blank"
+         style="font-size:20px; font-weight:700; color:var(--primary); text-decoration:none;">
+        https://durecoop-team.onrender.com
+      </a>
+      <p style="color:#999; font-size:13px; margin-top:8px; margin-bottom:0;">PC, 태블릿, 스마트폰 모두 사용 가능합니다.</p>
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-label">&#128161; 참고</div>
+      <p>처음 접속 시 서버가 깨어나는 데 30초~1분 정도 걸릴 수 있습니다. 잠시 기다려주세요.</p>
+    </div>
+
+    <h3>&#128100; 로그인</h3>
+    <p>별도의 아이디/비밀번호 없이, 로그인 화면에서 <strong>본인 이름을 클릭</strong>하면 바로 로그인됩니다.</p>
+
+    <div class="card">
+      <h4>팀원 목록 (7명)</h4>
+      <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:12px;">
+        <span class="user-chip"><span class="user-dot" style="background:#155940;"></span> 이지원</span>
+        <span class="user-chip"><span class="user-dot" style="background:#ff8f00;"></span> 임소영</span>
+        <span class="user-chip"><span class="user-dot" style="background:#795548;"></span> 박슬기</span>
+        <span class="user-chip"><span class="user-dot" style="background:#e91e63;"></span> 이선아</span>
+        <span class="user-chip"><span class="user-dot" style="background:#9c27b0;"></span> 이미리</span>
+        <span class="user-chip"><span class="user-dot" style="background:#3f51b5;"></span> 김미정</span>
+        <span class="user-chip"><span class="user-dot" style="background:#00897b;"></span> 정은주</span>
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <span class="icon">&#128247;</span>
+      로그인 화면: 초록 배경에 팀원 카드가 나열된 모습
+    </div>
+
+    <h3>&#128100; 프로필 설정</h3>
+    <p>로그인 후 상단의 본인 이름/아이콘을 클릭하면 프로필 설정을 할 수 있습니다.</p>
+    <ul>
+      <li><strong>닉네임 변경</strong>: 표시되는 이름을 원하는 닉네임으로 바꿀 수 있습니다.</li>
+      <li><strong>프로필 사진 변경</strong>: 원하는 사진을 업로드하여 프로필 이미지를 설정할 수 있습니다.</li>
+    </ul>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 대시보드 -->
+  <!-- ============================================ -->
+  <section class="section" id="dashboard">
+    <h2 class="section-title"><span class="icon">&#128202;</span> 대시보드</h2>
+    <p class="section-desc">로그인 직후 보이는 메인 화면입니다. 팀 전체 현황을 한눈에 파악할 수 있습니다.</p>
+
+    <h3>&#127991; 상태 카드</h3>
+    <p>화면 상단에 4개의 요약 카드가 표시됩니다.</p>
+    <table>
+      <tr><th>카드</th><th>설명</th></tr>
+      <tr><td><span class="badge badge-urgent">긴급</span></td><td>긴급 우선순위 업무 개수</td></tr>
+      <tr><td><span style="color:var(--primary); font-weight:600;">진행중</span></td><td>현재 진행 중인 업무 개수</td></tr>
+      <tr><td><span style="color:var(--orange); font-weight:600;">오늘 할 일</span></td><td>오늘 마감이거나 오늘 시작인 업무 개수</td></tr>
+      <tr><td><span class="badge badge-done">완료</span></td><td>완료된 업무 개수</td></tr>
+    </table>
+    <p>각 카드를 <strong>클릭</strong>하면 해당 업무 목록으로 이동합니다.</p>
+
+    <h3>&#128203; 오늘 할 일 목록</h3>
+    <p>대시보드 중앙에 오늘 처리해야 할 업무들이 리스트로 표시됩니다. 클릭하면 업무 상세 화면으로 이동합니다.</p>
+
+    <h3>&#128101; 팀원 현황</h3>
+    <p>각 팀원이 현재 진행 중인 업무 수, 완료 업무 수 등을 확인할 수 있습니다.</p>
+
+    <h3>&#128340; 최근 활동</h3>
+    <p>팀 전체의 최근 활동 내역(업무 등록, 상태 변경, 공지 등)이 시간순으로 표시됩니다.</p>
+
+    <div class="ai-tip">
+      <div class="ai-tip-label">&#129302; AI 활용 팁</div>
+      <p>대시보드에서 현황을 확인한 후, 화면 우측 하단의 <strong>&#129302; AI 채팅</strong> 버튼을 눌러 "오늘 뭐 해야 해?" 라고 물어보면 오늘의 업무를 정리해 알려줍니다.</p>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 업무 관리 -->
+  <!-- ============================================ -->
+  <section class="section" id="task">
+    <h2 class="section-title"><span class="icon">&#9989;</span> 업무 관리</h2>
+    <p class="section-desc">업무를 등록하고, 상태를 관리하고, 팀 전체 업무를 확인하는 핵심 기능입니다.</p>
+
+    <h3>&#10133; 새 업무 등록</h3>
+    <p>두 가지 방법으로 새 업무를 등록할 수 있습니다.</p>
+    <ol class="steps">
+      <li><strong>단축키 <kbd>N</kbd></strong>을 누르거나, 캘린더에서 <strong>+ 일정추가</strong> 버튼을 클릭합니다.</li>
+      <li>업무 등록 폼이 열리면 아래 항목을 입력합니다.</li>
+    </ol>
+
+    <div class="card">
+      <h4>업무 등록 항목</h4>
+      <table>
+        <tr><th style="width:140px;">항목</th><th>설명</th></tr>
+        <tr><td><strong>제목</strong></td><td>업무 이름 (필수)</td></tr>
+        <tr><td><strong>우선순위</strong></td><td><span class="badge badge-urgent">긴급</span> 또는 <span class="badge badge-normal">일보따리</span> (일반)</td></tr>
+        <tr><td><strong>상태</strong></td><td>시작전 / 진행중 / 완료</td></tr>
+        <tr><td><strong>기간 설정</strong></td><td>FROM ~ TO 날짜 지정<br>- 당일 날짜가 자동 입력됩니다<br>- <strong>+1주</strong> 버튼으로 종료일을 빠르게 설정<br>- 비우기 버튼으로 날짜를 지울 수 있습니다</td></tr>
+        <tr><td><strong>담당 팀원</strong></td><td>로그인한 사용자가 자동 선택됩니다. 다른 팀원으로 변경 가능.</td></tr>
+        <tr><td><strong>메모</strong></td><td>업무에 대한 상세 설명이나 메모</td></tr>
+      </table>
+    </div>
+
+    <div class="ai-tip">
+      <div class="ai-tip-label">&#129302; AI 도움 받기 - 메모 작성</div>
+      <p>메모 입력란 아래의 <strong>&#129302; AI 도움 받기</strong> 버튼을 클릭하면, 입력한 제목을 바탕으로 AI가 메모 초안을 자동 생성합니다. 생성된 내용을 수정하여 사용하세요.</p>
+    </div>
+
+    <h3>&#128194; 내 업무 / 팀 전체 보기</h3>
+    <p>업무 목록 상단의 토글 버튼으로 보기를 전환할 수 있습니다.</p>
+    <ul>
+      <li><strong>내 업무</strong>: 나에게 배정된 업무만 표시</li>
+      <li><strong>팀 전체</strong>: 모든 팀원의 업무 표시</li>
+    </ul>
+
+    <h3>&#128270; 업무 상세</h3>
+    <p>업무를 클릭하면 상세 화면이 열립니다.</p>
+    <ul>
+      <li><strong>메모 히스토리</strong>: 이전에 작성된 메모들을 시간순으로 확인</li>
+      <li><strong>메모 추가</strong>: 새로운 메모를 추가 (AI 도움 받기 가능)</li>
+      <li>상태, 우선순위, 담당자 등을 수정할 수 있습니다.</li>
+    </ul>
+
+    <h3>&#128433; 우클릭 메뉴</h3>
+    <p>업무 항목 위에서 <strong>마우스 오른쪽 클릭</strong>을 하면 빠른 메뉴가 나타납니다.</p>
+    <ul>
+      <li><strong>상태 변경</strong>: 시작전 / 진행중 / 완료로 빠르게 변경</li>
+      <li><strong>삭제</strong>: 업무를 삭제합니다</li>
+    </ul>
+
+    <h3>&#128203; 칸반보드</h3>
+    <p>업무를 시각적으로 관리할 수 있는 칸반보드 뷰를 제공합니다.</p>
+    <ul>
+      <li>시작전 / 진행중 / 완료 세 개의 열(column)로 구분됩니다.</li>
+      <li>업무 카드를 <strong>드래그 앤 드롭</strong>하여 다른 열로 옮기면 상태가 자동으로 변경됩니다.</li>
+    </ul>
+
+    <div class="screenshot">
+      <span class="icon">&#128247;</span>
+      칸반보드: 시작전 / 진행중 / 완료 3개 열에 업무 카드가 배치된 모습
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 주간 일정 -->
+  <!-- ============================================ -->
+  <section class="section" id="weekly">
+    <h2 class="section-title"><span class="icon">&#128197;</span> 주간 일정</h2>
+    <p class="section-desc">이번 주 월~금의 일정을 한눈에 확인하고 고정 업무를 관리합니다.</p>
+
+    <h3>&#128467; 내 주간 일정</h3>
+    <p>월요일부터 금요일까지 이번 주의 업무와 일정이 표 형태로 표시됩니다. 등록한 업무의 기간에 따라 자동으로 해당 요일에 표시됩니다.</p>
+
+    <h3>&#128204; 고정 업무 관리</h3>
+    <p>매주 반복되는 정기 업무를 고정 업무로 등록할 수 있습니다.</p>
+    <ol class="steps">
+      <li><strong>+ 고정업무</strong> 버튼을 클릭합니다.</li>
+      <li>업무 이름과 해당 요일을 선택합니다.</li>
+      <li>등록된 고정 업무는 매주 해당 요일에 자동으로 표시됩니다.</li>
+    </ol>
+    <p>불필요한 고정 업무는 삭제 버튼을 눌러 제거할 수 있습니다.</p>
+
+    <h3>&#128197; 캘린더 이벤트 표시</h3>
+    <p>캘린더에 등록한 이벤트(회의, 연차 등)도 주간 일정에 함께 표시되어, 한 화면에서 전체 일정을 파악할 수 있습니다.</p>
+
+    <div class="ai-tip">
+      <div class="ai-tip-label">&#129302; AI 활용 팁</div>
+      <p>AI 채팅에서 "이번 주 일정 알려줘"라고 물어보면 이번 주 전체 일정을 요약해 줍니다.</p>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 캘린더 -->
+  <!-- ============================================ -->
+  <section class="section" id="calendar">
+    <h2 class="section-title"><span class="icon">&#128467;</span> 캘린더</h2>
+    <p class="section-desc">월간/주간 뷰로 일정을 확인하고 새 일정을 추가합니다.</p>
+
+    <h3>&#128196; 캘린더 뷰</h3>
+    <p>캘린더는 두 가지 보기 모드를 지원합니다.</p>
+    <ul>
+      <li><strong>월간 뷰</strong>: 한 달 전체 일정을 달력 형태로 확인</li>
+      <li><strong>주간 뷰</strong>: 한 주의 일정을 상세하게 확인</li>
+    </ul>
+
+    <h3>&#128197; 날짜 클릭</h3>
+    <p>달력에서 날짜를 클릭하면 해당 날짜의 일정 목록을 확인할 수 있습니다.</p>
+
+    <h3>&#10133; 일정 추가</h3>
+    <p><strong>+ 일정 추가</strong> 버튼을 클릭하여 새로운 일정을 등록할 수 있습니다.</p>
+
+    <h3>&#127991; 종류별 필터</h3>
+    <p>일정 종류에 따라 필터링하여 원하는 일정만 볼 수 있습니다.</p>
+    <table>
+      <tr><th>종류</th><th>용도</th></tr>
+      <tr><td><strong>업무</strong></td><td>일반 업무 일정</td></tr>
+      <tr><td><strong>회의</strong></td><td>팀 회의, 미팅</td></tr>
+      <tr><td><strong>연차</strong></td><td>휴가, 연차</td></tr>
+      <tr><td><strong>이벤트</strong></td><td>특별 행사, 이벤트</td></tr>
+    </table>
+
+    <div class="ai-tip">
+      <div class="ai-tip-label">&#129302; AI 활용 팁</div>
+      <p>AI 채팅에서 "다음 주 회의 일정 알려줘"라고 물어보면 등록된 회의 일정을 빠르게 확인할 수 있습니다.</p>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 회의록 -->
+  <!-- ============================================ -->
+  <section class="section" id="meeting">
+    <h2 class="section-title"><span class="icon">&#128221;</span> 회의록</h2>
+    <p class="section-desc">팀 회의 내용을 기록하고 체크사항을 관리합니다.</p>
+
+    <h3>&#9997; 회의록 작성</h3>
+    <p>새 회의록 작성 시 아래 항목을 입력합니다.</p>
+    <div class="card">
+      <ul class="feature-list">
+        <li><strong>제목</strong> - 회의 주제</li>
+        <li><strong>날짜</strong> - 회의 일시</li>
+        <li><strong>참석자</strong> - 참석한 팀원 선택 (다중 선택 가능)</li>
+        <li><strong>안건</strong> - 회의에서 다룰 주제들</li>
+        <li><strong>논의내용</strong> - 회의에서 나온 이야기 기록</li>
+        <li><strong>체크사항</strong> - 회의 후 해야 할 일 (To-Do)</li>
+      </ul>
+    </div>
+
+    <h3>&#9745; 체크사항 관리</h3>
+    <p>회의록의 체크사항은 각 항목을 클릭하여 <strong>완료/미완료</strong> 상태를 토글할 수 있습니다. 회의에서 결정된 사항이 제대로 이행되고 있는지 추적하는 데 유용합니다.</p>
+
+    <h3>&#128465; 회의록 삭제</h3>
+    <p>더 이상 필요하지 않은 회의록은 삭제 버튼을 눌러 제거할 수 있습니다.</p>
+
+    <div class="ai-tip">
+      <div class="ai-tip-label">&#129302; AI 활용 팁</div>
+      <p>AI 채팅에서 "최근 회의 내용 알려줘"라고 물어보면 최근 회의록의 핵심 내용을 요약해 줍니다.</p>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 공지 -->
+  <!-- ============================================ -->
+  <section class="section" id="notice">
+    <h2 class="section-title"><span class="icon">&#128227;</span> 공지</h2>
+    <p class="section-desc">팀 내 공지사항을 작성하고 읽음 상태를 관리합니다.</p>
+
+    <h3>&#9997; 공지 작성</h3>
+    <p>공지를 작성할 때 종류를 선택할 수 있습니다.</p>
+    <table>
+      <tr><th>종류</th><th>용도</th></tr>
+      <tr><td><strong>타임세일</strong></td><td>타임세일 관련 안내</td></tr>
+      <tr><td><strong>증정이벤트</strong></td><td>증정 이벤트 안내</td></tr>
+      <tr><td><strong>일반공지</strong></td><td>기타 일반 공지사항</td></tr>
+    </table>
+
+    <div class="ai-tip">
+      <div class="ai-tip-label">&#129302; AI 도움 받기 - 공지 작성</div>
+      <p>공지 작성 시 <strong>&#129302; AI 도움 받기</strong> 버튼을 클릭하면, 입력한 키워드나 간단한 내용을 바탕으로 AI가 체계적인 공지문을 자동으로 작성해 줍니다.</p>
+      <p>예: "3월 20일 타임세일 30% 할인" 입력 &rarr; AI가 상세한 공지 문구 생성</p>
+    </div>
+
+    <h3>&#128064; 읽음/안읽음 상태</h3>
+    <p>각 공지에는 읽음/안읽음 상태가 표시됩니다. 공지를 클릭하여 확인하면 자동으로 읽음 처리됩니다.</p>
+
+    <h3>&#128269; 공지 필터</h3>
+    <p>상단 필터 버튼으로 원하는 공지만 볼 수 있습니다.</p>
+    <ul>
+      <li><strong>전체</strong>: 모든 공지 표시</li>
+      <li><strong>안읽음</strong>: 아직 읽지 않은 공지만 표시</li>
+      <li><strong>읽음</strong>: 이미 읽은 공지만 표시</li>
+    </ul>
+
+    <div class="ai-tip">
+      <div class="ai-tip-label">&#129302; AI 활용 팁</div>
+      <p>AI 채팅에서 "안 읽은 공지 있어?"라고 물어보면 아직 확인하지 않은 공지 목록을 알려줍니다.</p>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 내 메모 -->
+  <!-- ============================================ -->
+  <section class="section" id="memo">
+    <h2 class="section-title"><span class="icon">&#128196;</span> 내 메모</h2>
+    <p class="section-desc">개인 메모를 작성하고 검색할 수 있는 공간입니다.</p>
+
+    <h3>&#9997; 메모 작성</h3>
+    <p>개인적인 메모를 자유롭게 작성할 수 있습니다. 업무 관련 메모, 아이디어, 참고 사항 등 무엇이든 기록하세요.</p>
+
+    <h3>&#128465; 메모 삭제</h3>
+    <p>불필요한 메모는 삭제 버튼을 눌러 제거할 수 있습니다.</p>
+
+    <h3>&#128269; 메모 검색</h3>
+    <p>메모가 많아졌을 때 검색 기능을 활용하여 원하는 메모를 빠르게 찾을 수 있습니다.</p>
+
+    <div class="ai-tip">
+      <div class="ai-tip-label">&#129302; AI 도움 받기 - 메모 작성</div>
+      <p>메모 작성 시 <strong>&#129302; AI 도움 받기</strong> 버튼을 활용하면, 간단한 키워드만 입력해도 AI가 정리된 메모 내용을 작성해 줍니다.</p>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 반복 업무 -->
+  <!-- ============================================ -->
+  <section class="section" id="recurring">
+    <h2 class="section-title"><span class="icon">&#128260;</span> 반복 업무</h2>
+    <p class="section-desc">정기적으로 발생하는 업무를 관리합니다.</p>
+
+    <h3>&#128337; 주기별 반복 업무</h3>
+    <p>반복 업무는 주기에 따라 세 가지로 구분됩니다.</p>
+    <table>
+      <tr><th>주기</th><th>예시</th></tr>
+      <tr><td><strong>매주</strong></td><td>주간 보고서 작성, 매주 회의</td></tr>
+      <tr><td><strong>매월</strong></td><td>월간 정산, 재고 조사</td></tr>
+      <tr><td><strong>매년</strong></td><td>연간 감사, 대규모 행사</td></tr>
+    </table>
+
+    <h3>&#9745; 타임라인 체크</h3>
+    <p>반복 업무의 각 회차별로 완료 여부를 체크할 수 있습니다. 타임라인 형태로 진행 상황을 한눈에 확인하세요.</p>
+
+    <h3>&#128100; 담당자별 필터</h3>
+    <p>특정 팀원의 반복 업무만 필터링하여 볼 수 있습니다.</p>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 팀 목표 -->
+  <!-- ============================================ -->
+  <section class="section" id="goal">
+    <h2 class="section-title"><span class="icon">&#127919;</span> 팀 목표</h2>
+    <p class="section-desc">팀의 연간/월간 목표를 설정하고 달성률을 추적합니다.</p>
+
+    <h3>&#127942; 연간 목표</h3>
+    <p>팀의 큰 방향성이 되는 연간 목표를 설정합니다. 각 목표에는 <strong>진행률 바</strong>가 표시되어 현재 달성 상황을 시각적으로 확인할 수 있습니다.</p>
+
+    <div class="card" style="display:flex; align-items:center; gap:16px;">
+      <div style="flex:1;">
+        <div style="font-weight:600; margin-bottom:4px;">매출 목표 달성</div>
+        <div style="background:#e0e0e0; border-radius:8px; height:12px; overflow:hidden;">
+          <div style="background:var(--primary); width:65%; height:100%; border-radius:8px;"></div>
+        </div>
+      </div>
+      <div style="font-weight:700; color:var(--primary);">65%</div>
+    </div>
+
+    <h3>&#128197; 월간 목표</h3>
+    <p>연간 목표를 달성하기 위한 월간 세부 목표를 추가하고 수정할 수 있습니다. 매월 구체적인 실행 계획을 세워보세요.</p>
+
+    <div class="ai-tip">
+      <div class="ai-tip-label">&#129302; AI 활용 팁</div>
+      <p>AI 채팅에서 팀 목표 달성 현황을 물어보면 전체 진행 상황을 요약해 줍니다.</p>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- AI 어시스턴트 -->
+  <!-- ============================================ -->
+  <section class="section" id="ai">
+    <h2 class="section-title"><span class="icon">&#129302;</span> AI 어시스턴트</h2>
+    <p class="section-desc">화면 우측 하단의 &#129302; 버튼을 눌러 AI 채팅을 시작하세요.</p>
+
+    <h3>&#128172; 사용 방법</h3>
+    <ol class="steps">
+      <li>화면 <strong>우측 하단</strong>의 &#129302; 버튼을 클릭합니다.</li>
+      <li>채팅 창이 열리면 <strong>자유롭게 질문</strong>을 입력합니다.</li>
+      <li>AI가 시스템에 등록된 데이터를 참고하여 답변합니다.</li>
+    </ol>
+
+    <h3>&#128161; 질문 예시</h3>
+    <div class="card">
+      <table>
+        <tr><th>질문</th><th>AI가 해주는 것</th></tr>
+        <tr><td>"내 업무 알려줘"</td><td>나에게 배정된 업무 목록 정리</td></tr>
+        <tr><td>"긴급 업무 뭐 있어?"</td><td>긴급 우선순위 업무만 필터링</td></tr>
+        <tr><td>"최근 회의 내용"</td><td>최근 회의록 핵심 내용 요약</td></tr>
+        <tr><td>"이번 주 일정"</td><td>이번 주 전체 일정 정리</td></tr>
+        <tr><td>"안 읽은 공지 있어?"</td><td>미확인 공지사항 알려주기</td></tr>
+        <tr><td>자유로운 질문</td><td>Claude AI 기반 대화 (일반 질문도 가능)</td></tr>
+      </table>
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-label">&#128161; 참고</div>
+      <p>AI 어시스턴트는 시스템에 등록된 업무, 공지, 회의록 등의 데이터를 참고하여 답변합니다. 등록되지 않은 정보에 대해서는 답변이 제한될 수 있습니다.</p>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 단축키 -->
+  <!-- ============================================ -->
+  <section class="section" id="shortcuts">
+    <h2 class="section-title"><span class="icon">&#9000;</span> 단축키</h2>
+    <p class="section-desc">키보드 단축키를 활용하면 더 빠르게 시스템을 사용할 수 있습니다.</p>
+
+    <div class="shortcut-grid">
+      <div class="shortcut-item"><kbd>N</kbd> <span>새 업무 등록</span></div>
+      <div class="shortcut-item"><kbd>/</kbd> <span>검색</span></div>
+      <div class="shortcut-item"><kbd>1</kbd> ~ <kbd>9</kbd> <span>탭 이동 (1~9번째)</span></div>
+      <div class="shortcut-item"><kbd>0</kbd> <span>10번째 탭 이동</span></div>
+      <div class="shortcut-item"><kbd>?</kbd> <span>단축키 목록 보기</span></div>
+      <div class="shortcut-item"><kbd>ESC</kbd> <span>모달/알림 닫기</span></div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-label">&#128161; 팁</div>
+      <p>앱 사용 중 언제든지 <kbd>?</kbd> 키를 누르면 단축키 목록을 확인할 수 있습니다.</p>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- AI 활용 팁 -->
+  <!-- ============================================ -->
+  <section class="section" id="tips">
+    <h2 class="section-title"><span class="icon">&#128161;</span> AI 활용 팁 모음</h2>
+    <p class="section-desc">AI 기능을 최대한 활용하는 방법을 정리했습니다.</p>
+
+    <h3>&#9997; 메모 작성 자동화</h3>
+    <div class="card">
+      <ol class="steps">
+        <li>업무 등록 시 <strong>제목</strong>만 입력합니다.</li>
+        <li>메모란 아래의 <strong>&#129302; AI 도움 받기</strong> 버튼을 클릭합니다.</li>
+        <li>AI가 제목을 기반으로 <strong>상세 메모 초안</strong>을 자동 생성합니다.</li>
+        <li>생성된 내용을 검토하고 필요한 부분을 수정합니다.</li>
+      </ol>
+    </div>
+
+    <h3>&#128227; 공지 작성 자동화</h3>
+    <div class="card">
+      <ol class="steps">
+        <li>공지 종류(타임세일/증정이벤트/일반공지)를 선택합니다.</li>
+        <li>핵심 키워드를 입력합니다. (예: "3/20 딸기 타임세일 30%")</li>
+        <li><strong>&#129302; AI 도움 받기</strong> 버튼을 클릭합니다.</li>
+        <li>AI가 체계적이고 읽기 좋은 <strong>공지문</strong>으로 변환합니다.</li>
+      </ol>
+    </div>
+
+    <h3>&#129302; AI 채팅 활용</h3>
+    <div class="card">
+      <ul class="feature-list">
+        <li><strong>업무 현황 파악</strong> - "오늘 뭐 해야 해?", "긴급 업무 알려줘"</li>
+        <li><strong>팀 상황 요약</strong> - "팀 전체 업무 현황 알려줘"</li>
+        <li><strong>일정 확인</strong> - "이번 주 일정", "다음 회의 언제야?"</li>
+        <li><strong>공지 확인</strong> - "안 읽은 공지 있어?", "최근 공지 내용"</li>
+        <li><strong>자유 대화</strong> - 업무 관련 질문이나 아이디어 브레인스토밍</li>
+      </ul>
+    </div>
+
+    <div class="ai-tip">
+      <div class="ai-tip-label">&#129302; 효과적인 AI 사용 팁</div>
+      <p><strong>구체적으로 물어보세요.</strong> "업무 알려줘"보다 "이번 주 긴급 업무 중 미완료인 것 알려줘"가 더 정확한 답변을 받을 수 있습니다.</p>
+      <p><strong>AI 도움 받기 버튼을 적극 활용하세요.</strong> 메모, 공지 등 글을 작성할 때 초안 생성 기능을 사용하면 시간을 크게 절약할 수 있습니다.</p>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <p>&copy; 2026 두레생협 팀 업무 관리 시스템 &middot;
+    <a href="https://durecoop-team.onrender.com" style="color:var(--primary); text-decoration:none;">앱으로 돌아가기</a>
+  </p>
+</footer>
+
+<!-- Back to Top -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="맨 위로">&#8593;</button>
+
+<script>
+  // Sidebar toggle (mobile)
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  }
+
+  // Close sidebar when clicking a link (mobile)
+  document.querySelectorAll('.sidebar a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+      }
+    });
+  });
+
+  // Active sidebar link on scroll
+  var sections = document.querySelectorAll('.section');
+  var navLinks = document.querySelectorAll('.sidebar a');
+
+  function updateActiveLink() {
+    var scrollPos = window.scrollY + 100;
+    sections.forEach(function(section) {
+      var top = section.offsetTop;
+      var height = section.offsetHeight;
+      var id = section.getAttribute('id');
+      if (scrollPos >= top && scrollPos < top + height) {
+        navLinks.forEach(function(link) {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === '#' + id) {
+            link.classList.add('active');
+          }
+        });
+      }
+    });
+  }
+
+  // Back to top button visibility
+  function updateBackToTop() {
+    var btn = document.getElementById('backToTop');
+    if (window.scrollY > 300) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  }
+
+  window.addEventListener('scroll', function() {
+    updateActiveLink();
+    updateBackToTop();
+  });
+
+  // Initial state
+  updateActiveLink();
+</script>
+
+</body>
+</html>
