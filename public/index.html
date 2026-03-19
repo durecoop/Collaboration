@@ -873,6 +873,9 @@
               </div>
               <div class="filter-bar">
                 <input class="search-input" placeholder="🔍 업무 검색..." oninput="filterTasks(this)">
+                <div class="filter-chip active" onclick="toggleTaskScope(this,'mine')">내 업무</div>
+                <div class="filter-chip" onclick="toggleTaskScope(this,'team')">팀 전체</div>
+                <span style="width:1px;height:24px;background:#ddd;margin:0 4px;"></span>
                 <div class="filter-chip active" onclick="toggleTaskFilter(this,'all')">전체</div>
                 <div class="filter-chip" onclick="toggleTaskFilter(this,'urgent')">🔴 긴급</div>
                 <div class="filter-chip" onclick="toggleTaskFilter(this,'normal')">🔵 일보따리</div>
@@ -1090,7 +1093,12 @@
       <div class="status-option" onclick="selOption(this,'status','진행중')">진행중</div>
       <div class="status-option" onclick="selOption(this,'status','완료')">완료</div>
     </div>
-    <label>마감일</label><input type="date" id="addTaskDeadline">
+    <label>기간</label>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="date" id="addTaskStartDate" style="flex:1;"> <span style="color:#999;font-weight:600;">~</span> <input type="date" id="addTaskEndDate" style="flex:1;">
+      <button type="button" onclick="setEndDateWeekLater()" style="background:#f0f0f0;border:1px solid #ddd;padding:8px 12px;border-radius:8px;font-size:12px;cursor:pointer;white-space:nowrap;">+1주</button>
+      <button type="button" onclick="clearTaskDates()" style="background:#f0f0f0;border:1px solid #ddd;padding:8px 12px;border-radius:8px;font-size:12px;cursor:pointer;white-space:nowrap;">비우기</button>
+    </div>
     <label>담당 팀원</label>
     <div class="assignee-chips" id="addTaskAssignees"></div>
     <label>메모</label>
@@ -1727,8 +1735,22 @@ function renderDashboard() {
 }
 
 // ── 업무 목록 (내 업무 탭) ──
+let taskScope = 'mine';
+
+function toggleTaskScope(el, scope) {
+  el.parentElement.querySelectorAll('.filter-chip').forEach(e => {
+    if (e.textContent === '내 업무' || e.textContent === '팀 전체') e.classList.remove('active');
+  });
+  el.classList.add('active');
+  taskScope = scope;
+  renderTaskList();
+}
+
 function renderTaskList(filter) {
-  const tasks = appData.tasks.filter(t => t.status !== '완료');
+  let tasks = appData.tasks.filter(t => t.status !== '완료');
+  if (taskScope === 'mine' && currentUser) {
+    tasks = tasks.filter(t => t.assignees.includes(currentUser.name));
+  }
   const urgentTasks = tasks.filter(t => t.priority === 'urgent');
   const normalTasks = tasks.filter(t => t.priority === 'normal');
 
@@ -1752,9 +1774,11 @@ function renderTaskCard(t) {
   const checked = t.status === '완료' ? 'checked' : '';
   const checkedCard = t.status === '완료' ? 'checked-card' : '';
   let metaHtml = '';
-  if (t.deadline) {
-    if (t.deadline < today) metaHtml += `<span class="meta-tag tag-overdue">📅 ${t.deadline.slice(5)} 마감지남</span>`;
-    else metaHtml += `<span class="meta-tag tag-deadline">📅 ${t.deadline.slice(5)}</span>`;
+  const dl = t.endDate || t.deadline;
+  if (t.startDate || dl) {
+    const dateStr = (t.startDate ? t.startDate.slice(5) : '') + (t.startDate && dl ? '~' : '') + (dl ? dl.slice(5) : '');
+    if (dl && dl < today) metaHtml += `<span class="meta-tag tag-overdue">📅 ${dateStr} 마감지남</span>`;
+    else metaHtml += `<span class="meta-tag tag-deadline">📅 ${dateStr}</span>`;
   }
   if (t.assignees.length) metaHtml += `<span class="meta-tag tag-assignee">👤 ${t.assignees.join(', ')}</span>`;
   if (t.memos.length) metaHtml += `<span class="meta-tag tag-memo">📝 ${t.memos.length}</span>`;
@@ -1771,8 +1795,13 @@ function selectTask(id) {
   const t = appData.tasks.find(t => t.id === id);
   if (!t) return;
   const today = getToday();
-  const dlStyle = t.deadline && t.deadline < today ? 'color:#dc2626;font-weight:600;' : 'color:#d97706;';
-  const dlText = t.deadline ? (t.deadline < today ? `📅 ${t.deadline} (마감 지남!)` : `📅 ${t.deadline}`) : '없음';
+  const dl = t.endDate || t.deadline;
+  const dlStyle = dl && dl < today ? 'color:#dc2626;font-weight:600;' : 'color:#d97706;';
+  let dlText = '없음';
+  if (t.startDate || dl) {
+    const range = (t.startDate || '') + (t.startDate && dl ? ' ~ ' : '') + (dl || '');
+    dlText = dl && dl < today ? `📅 ${range} (마감 지남!)` : `📅 ${range}`;
+  }
   const priorityBadge = t.priority === 'urgent' ? '<span class="cat-badge badge-urgent">긴급</span>' : '<span class="cat-badge badge-normal">일보따리</span>';
 
   let memoHtml = t.memos.length ?
@@ -2903,22 +2932,22 @@ async function saveTask() {
   const statusMap = {'sel-todo':'시작전','sel-progress':'진행중','sel-done':'완료'};
   let status = '시작전';
   if (statusEl) { for (const [cls, val] of Object.entries(statusMap)) { if (statusEl.classList.contains(cls)) { status = val; break; } } }
-  const deadline = document.getElementById('addTaskDeadline').value;
+  const startDate = document.getElementById('addTaskStartDate').value;
+  const endDate = document.getElementById('addTaskEndDate').value;
   const assignees = [...document.querySelectorAll('#addTaskAssignees .assignee-chip.selected')].map(e => e.textContent);
   const memo = document.getElementById('addTaskMemo').value.trim();
 
-  const taskData = { title, priority, status, deadline, assignees, memos: memo ? [{date: getTodayShort(), text: memo}] : [] };
+  const taskData = { title, priority, status, startDate, endDate, deadline: endDate, assignees, memos: memo ? [{date: getTodayShort(), text: memo}] : [] };
   const result = await api.post('/api/tasks', taskData);
 
-  const newId = result.id || (Math.max(...appData.tasks.map(t => t.id), 0) + 1);
-  taskData.id = newId;
-  appData.tasks.push(taskData);
+  appData.tasks.push(result);
 
   closeModal('addModal');
   renderAll();
 
   document.getElementById('addTaskTitle').value = '';
-  document.getElementById('addTaskDeadline').value = '';
+  document.getElementById('addTaskStartDate').value = '';
+  document.getElementById('addTaskEndDate').value = '';
   document.getElementById('addTaskMemo').value = '';
   document.querySelectorAll('#addTaskAssignees .assignee-chip').forEach(e => e.classList.remove('selected'));
 }
@@ -2999,7 +3028,15 @@ function addMeetingCheckItem() {
 //  UI 유틸
 // ═══════════════════════════════════════
 function toggleNotif() { document.getElementById('notifPanel').classList.toggle('show'); }
-function openModal(id) { document.getElementById(id).classList.add('show'); }
+function openModal(id) {
+  document.getElementById(id).classList.add('show');
+  // 업무 등록 모달 열 때 날짜 기본값 세팅
+  if (id === 'addModal') {
+    const today = getToday();
+    document.getElementById('addTaskStartDate').value = today;
+    document.getElementById('addTaskEndDate').value = today;
+  }
+}
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 document.querySelectorAll('.modal-overlay').forEach(o => { o.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); }); });
 
@@ -3199,6 +3236,21 @@ document.addEventListener('keydown', function(e) {
     if (navItem) navTo(tabName, navItem);
   }
 });
+
+// ═══════════════════════════════════════
+//  날짜 헬퍼 (업무 등록)
+// ═══════════════════════════════════════
+function setEndDateWeekLater() {
+  const start = document.getElementById('addTaskStartDate').value || getToday();
+  const d = new Date(start);
+  d.setDate(d.getDate() + 7);
+  document.getElementById('addTaskEndDate').value = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function clearTaskDates() {
+  document.getElementById('addTaskStartDate').value = '';
+  document.getElementById('addTaskEndDate').value = '';
+}
 
 // ═══════════════════════════════════════
 //  AI 메모 작성 도우미

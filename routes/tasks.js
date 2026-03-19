@@ -13,7 +13,7 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const { title, priority, status, deadline, assignees } = req.body;
+  const { title, priority, status, deadline, startDate, endDate, assignees } = req.body;
   if (!title) return res.status(400).json({ error: '제목이 필요합니다' });
 
   const task = {
@@ -21,7 +21,9 @@ router.post('/', (req, res) => {
     title,
     priority: priority || 'normal',
     status: status || '시작전',
-    deadline: deadline || '',
+    startDate: startDate || '',
+    endDate: endDate || '',
+    deadline: endDate || deadline || '',
     assignees: assignees || [],
     memos: []
   };
@@ -34,11 +36,13 @@ router.put('/:id', (req, res) => {
   const task = db.data.tasks.find(t => t.id === Number(req.params.id));
   if (!task) return res.status(404).json({ error: '업무를 찾을 수 없습니다' });
 
-  const { title, priority, status, deadline, assignees } = req.body;
+  const { title, priority, status, deadline, startDate, endDate, assignees } = req.body;
   if (title !== undefined) task.title = title;
   if (priority !== undefined) task.priority = priority;
   if (status !== undefined) task.status = status;
-  if (deadline !== undefined) task.deadline = deadline;
+  if (startDate !== undefined) task.startDate = startDate;
+  if (endDate !== undefined) { task.endDate = endDate; task.deadline = endDate; }
+  if (deadline !== undefined && endDate === undefined) task.deadline = deadline;
   if (assignees !== undefined) task.assignees = assignees;
   db.save();
   res.json(task);
