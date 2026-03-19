@@ -866,6 +866,7 @@
                     <button class="pw-nav-btn" onclick="changePW(-1)">◀</button>
                     <span class="pw-week-label" id="pwLabel">3/16 ~ 3/20</span>
                     <button class="pw-nav-btn" onclick="changePW(1)">▶</button>
+                    <button onclick="openFixedTaskModal()" style="background:#f59e0b;color:#fff;border:none;padding:5px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-weight:600;margin-left:8px;">+ 고정업무</button>
                   </div>
                 </div>
                 <div class="pw-grid" id="pwGrid"></div>
@@ -1255,6 +1256,27 @@
   </div>
 </div>
 
+<!-- ════ 고정 업무 등록 모달 ════ -->
+<div class="modal-overlay" id="fixedTaskModal">
+  <div class="modal" style="width:440px;">
+    <h3>🔁 주간 고정 업무 관리</h3>
+    <div id="fixedTaskList" style="margin-bottom:16px;"></div>
+    <div style="border-top:1px solid #eee;padding-top:14px;">
+      <label>새 고정 업무 추가</label>
+      <input type="text" id="addFixedTitle" placeholder="업무 제목 (예: 주간보고 작성)">
+      <label>요일</label>
+      <select id="addFixedDay" style="width:100%;padding:10px 12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;">
+        <option value="1">월요일</option><option value="2">화요일</option><option value="3">수요일</option>
+        <option value="4">목요일</option><option value="5">금요일</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('fixedTaskModal')">닫기</button>
+      <button class="btn-submit" onclick="saveFixedTask()">추가</button>
+    </div>
+  </div>
+</div>
+
 <!-- ════ 프로필 설정 모달 ════ -->
 <div class="modal-overlay" id="profileModal">
   <div class="modal" style="width:420px;">
@@ -1354,7 +1376,7 @@ async function loadAllData() {
     calendarEvents: calendar,
     recurringTasks: recurring,
     teamGoals: goals,
-    fixedTasks: [{day:1,title:'주간보고 작성'},{day:3,title:'팀 미팅 준비'},{day:5,title:'주간 정산'}],
+    fixedTasks: recurring.filter(r => r.cycle === 'weekly').map(r => ({ id: r.id, day: r.dayOfWeek || r.day_of_week, title: r.title, assignees: r.assignees || [] })),
     chatHistory: appData.chatHistory || []
   };
 }
@@ -2351,7 +2373,7 @@ function renderPW() {
     html += '<div class="pw-day-header"><span>' + dayNames[i] + '</span><span class="pw-date">' + date.getDate() + '</span></div>';
 
     appData.fixedTasks.forEach(ft => {
-      if (ft.day === dayNum) {
+      if (ft.day === dayNum && (!ft.assignees || ft.assignees.length === 0 || ft.assignees.includes(currentUser?.name))) {
         html += `<div class="pw-task-item pw-fixed"><div class="pw-task-check" onclick="event.stopPropagation();this.classList.toggle('pw-checked');this.textContent=this.classList.contains('pw-checked')?'✓':'';">​</div><span class="pw-task-label">🔁 ${ft.title}</span></div>`;
       }
     });
@@ -2369,6 +2391,59 @@ function renderPW() {
 }
 
 function changePW(d) { pwWeekOffset += d; renderPW(); }
+
+// ── 고정 업무 모달 ──
+function openFixedTaskModal() {
+  renderFixedTaskList();
+  openModal('fixedTaskModal');
+}
+
+function renderFixedTaskList() {
+  const dayNames = ['일','월','화','수','목','금','토'];
+  const list = document.getElementById('fixedTaskList');
+  const myFixed = appData.fixedTasks.filter(ft => !ft.assignees || ft.assignees.length === 0 || ft.assignees.includes(currentUser?.name));
+  if (myFixed.length === 0) {
+    list.innerHTML = '<div style="color:#999;font-size:13px;padding:10px 0;">등록된 고정 업무가 없습니다</div>';
+    return;
+  }
+  list.innerHTML = myFixed.map(ft =>
+    `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;">
+      <span style="background:#fff7ed;border:1.5px dashed #f59e0b;color:#92400e;padding:3px 10px;border-radius:8px;font-size:12px;font-weight:600;">🔁 ${dayNames[ft.day]}요일</span>
+      <span style="flex:1;font-size:14px;">${ft.title}</span>
+      <button onclick="deleteFixedTask(${ft.id})" style="background:#fee2e2;color:#dc2626;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;">삭제</button>
+    </div>`
+  ).join('');
+}
+
+async function saveFixedTask() {
+  const title = document.getElementById('addFixedTitle').value.trim();
+  if (!title) return alert('업무 제목을 입력하세요');
+  const dayOfWeek = parseInt(document.getElementById('addFixedDay').value);
+
+  const result = await api.post('/api/recurring', {
+    title,
+    cycle: 'weekly',
+    dayOfWeek,
+    assignees: [currentUser.name]
+  });
+
+  appData.fixedTasks.push({ id: result.id, day: dayOfWeek, title, assignees: [currentUser.name] });
+  appData.recurringTasks.push(result);
+  document.getElementById('addFixedTitle').value = '';
+  renderFixedTaskList();
+  renderPW();
+  renderRecurring();
+}
+
+async function deleteFixedTask(id) {
+  if (!confirm('이 고정 업무를 삭제하시겠습니까?')) return;
+  await api.del('/api/recurring/' + id);
+  appData.fixedTasks = appData.fixedTasks.filter(ft => ft.id !== id);
+  appData.recurringTasks = appData.recurringTasks.filter(rt => rt.id !== id);
+  renderFixedTaskList();
+  renderPW();
+  renderRecurring();
+}
 
 // ═══════════════════════════════════════
 //  10. 반복 업무
