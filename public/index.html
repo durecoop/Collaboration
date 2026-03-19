@@ -1112,6 +1112,36 @@
   </div>
 </div>
 
+<!-- ════ 업무 수정 모달 ════ -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3>업무 수정</h3>
+    <input type="hidden" id="editTaskId">
+    <label>업무 제목</label><input type="text" id="editTaskTitle" placeholder="어떤 일을 해야 하나요?">
+    <label>우선순위</label>
+    <div class="priority-selector" id="editTaskPriority">
+      <div class="priority-option" onclick="selOption(this,'priority','urgent')">🔴 긴급</div>
+      <div class="priority-option" onclick="selOption(this,'priority','normal')">🔵 일보따리</div>
+    </div>
+    <label>상태</label>
+    <div class="status-selector" id="editTaskStatus">
+      <div class="status-option" onclick="selOption(this,'status','시작전')">시작 전</div>
+      <div class="status-option" onclick="selOption(this,'status','진행중')">진행중</div>
+      <div class="status-option" onclick="selOption(this,'status','완료')">완료</div>
+    </div>
+    <label>기간</label>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="date" id="editTaskStartDate" style="flex:1;"> <span style="color:#999;font-weight:600;">~</span> <input type="date" id="editTaskEndDate" style="flex:1;">
+    </div>
+    <label>담당 팀원</label>
+    <div class="assignee-chips" id="editTaskAssignees"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('editModal')">취소</button>
+      <button class="btn-submit" onclick="updateTask()">저장</button>
+    </div>
+  </div>
+</div>
+
 <!-- ════ 공지 작성 모달 ════ -->
 <div class="modal-overlay" id="noticeAddModal">
   <div class="modal notice-modal">
@@ -1816,11 +1846,21 @@ function selectTask(id) {
     return `<span class="avatar-xs av-${uid}" style="width:22px;height:22px;font-size:10px;display:inline-flex;">${initial}</span> ${a}`;
   }).join(' &nbsp; ');
 
+  const statusBtnStyle = (s) => t.status === s
+    ? 'background:#155940;color:#fff;border:2px solid #155940;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;'
+    : 'background:#fff;color:#333;border:2px solid #ddd;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;';
+
   document.getElementById('taskDetailPanel').innerHTML = `
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
       <h3 style="margin:0;">${escapeHtml(t.title)}</h3>
       ${priorityBadge}
-      <span class="meta-tag tag-status">${t.status}</span>
+    </div>
+    <div class="detail-row"><div class="detail-label">상태</div>
+      <div class="detail-value" style="display:flex;gap:6px;">
+        <button onclick="changeTaskStatus(${t.id},'시작전')" style="${statusBtnStyle('시작전')}">시작 전</button>
+        <button onclick="changeTaskStatus(${t.id},'진행중')" style="${statusBtnStyle('진행중')}">진행중</button>
+        <button onclick="changeTaskStatus(${t.id},'완료')" style="${statusBtnStyle('완료')}">완료</button>
+      </div>
     </div>
     <div class="detail-row"><div class="detail-label">마감일</div><div class="detail-value" style="${dlStyle}">${dlText}</div></div>
     <div class="detail-row"><div class="detail-label">담당</div><div class="detail-value">${assigneeHtml}</div></div>
@@ -1835,6 +1875,7 @@ function selectTask(id) {
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
+      <button class="btn-submit" onclick="openEditModal(${t.id})" style="background:#3b82f6;">수정</button>
       <button class="btn-delete" onclick="deleteTask(${t.id})">삭제</button>
       <button class="btn-cancel" onclick="document.getElementById('taskDetailPanel').innerHTML='<div class=\\'empty-detail\\'>업무를 선택하면 상세 내용이 여기에 표시됩니다</div>'">닫기</button>
     </div>`;
@@ -1848,6 +1889,69 @@ async function toggleTaskStatus(id) {
     t.status = newStatus;
     renderAll();
   }
+}
+
+async function changeTaskStatus(id, newStatus) {
+  const t = appData.tasks.find(t => t.id === id);
+  if (t) {
+    await api.patch('/api/tasks/' + id + '/status', { status: newStatus });
+    t.status = newStatus;
+    renderAll();
+    selectTask(id);
+  }
+}
+
+function openEditModal(id) {
+  const t = appData.tasks.find(t => t.id === id);
+  if (!t) return;
+  document.getElementById('editTaskId').value = id;
+  document.getElementById('editTaskTitle').value = t.title;
+  document.getElementById('editTaskStartDate').value = t.startDate || '';
+  document.getElementById('editTaskEndDate').value = t.endDate || t.deadline || '';
+  // 우선순위 세팅
+  document.querySelectorAll('#editTaskPriority .priority-option').forEach(e => e.className = 'priority-option');
+  const prCls = t.priority === 'urgent' ? 'sel-urgent' : 'sel-normal';
+  document.querySelectorAll('#editTaskPriority .priority-option').forEach(e => {
+    if ((t.priority === 'urgent' && e.textContent.includes('긴급')) || (t.priority !== 'urgent' && e.textContent.includes('일보따리')))
+      e.classList.add(prCls);
+  });
+  // 상태 세팅
+  const stMap = {'시작전':'sel-todo','진행중':'sel-progress','완료':'sel-done'};
+  const stLabels = {'시작전':'시작 전','진행중':'진행중','완료':'완료'};
+  document.querySelectorAll('#editTaskStatus .status-option').forEach(e => {
+    e.className = 'status-option';
+    for (const [val, cls] of Object.entries(stMap)) {
+      if (e.textContent.trim() === (stLabels[val] || val) && t.status === val) e.classList.add(cls);
+    }
+  });
+  // 담당자 세팅
+  buildAssigneeChips('editTaskAssignees', t.assignees);
+  openModal('editModal');
+}
+
+async function updateTask() {
+  const id = Number(document.getElementById('editTaskId').value);
+  const title = document.getElementById('editTaskTitle').value.trim();
+  if (!title) return alert('업무 제목을 입력하세요');
+  const priorityEl = document.querySelector('#editTaskPriority .priority-option[class*="sel-"]');
+  const priority = priorityEl?.classList.contains('sel-urgent') ? 'urgent' : 'normal';
+  const statusEl = document.querySelector('#editTaskStatus .status-option[class*="sel-"]');
+  const statusMap = {'sel-todo':'시작전','sel-progress':'진행중','sel-done':'완료'};
+  let status = '시작전';
+  if (statusEl) { for (const [cls, val] of Object.entries(statusMap)) { if (statusEl.classList.contains(cls)) { status = val; break; } } }
+  const startDate = document.getElementById('editTaskStartDate').value;
+  const endDate = document.getElementById('editTaskEndDate').value;
+  const assignees = [...document.querySelectorAll('#editTaskAssignees .assignee-chip.selected')].map(e => e.textContent);
+
+  const taskData = { title, priority, status, startDate, endDate, deadline: endDate, assignees };
+  await api.put('/api/tasks/' + id, taskData);
+
+  const t = appData.tasks.find(t => t.id === id);
+  if (t) { Object.assign(t, taskData); }
+
+  closeModal('editModal');
+  renderAll();
+  selectTask(id);
 }
 
 async function addTaskMemo(id) {
