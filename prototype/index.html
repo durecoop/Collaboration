@@ -6,18 +6,22 @@
   <title>팀 업무 관리</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif; background: #f0f2f5; overflow: hidden; height: 100vh; }
+    body { font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif; background: #f2f4f6; overflow: hidden; height: 100vh; }
 
     /* ── 로그인 ── */
     .login-screen {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      height: 100vh; background: linear-gradient(135deg, #667eea, #764ba2);
+      height: 100vh; background: linear-gradient(135deg, #155940, #3e6042);
+      overflow-y: auto; padding: 40px 20px;
     }
     .login-screen h1 { color: #fff; font-size: 36px; margin-bottom: 8px; }
     .login-screen p { color: rgba(255,255,255,0.8); margin-bottom: 40px; font-size: 17px; }
-    .login-cards { display: flex; gap: 24px; }
+    .login-sections { display: flex; flex-direction: column; gap: 28px; width: 100%; max-width: 700px; }
+    .login-dept { }
+    .login-dept-label { font-size: 16px; font-weight: 700; color: white; margin-bottom: 12px; }
+    .login-cards { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
     .login-card {
-      background: #fff; border-radius: 16px; padding: 40px 52px;
+      background: #fff; border-radius: 16px; padding: 24px 32px;
       text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
@@ -29,9 +33,33 @@
     }
     .login-card .name { font-size: 22px; font-weight: 600; color: #333; }
     .login-card .role { font-size: 13px; color: #999; margin-top: 4px; }
-    .av-jiwon { background: #667eea; }
-    .av-soyoung { background: #f093fb; }
-    .av-seulgi { background: #4facfe; }
+    .login-photo-wrap { width: 80px; height: 80px; border-radius: 50%; overflow: hidden; margin: 0 auto 12px; position: relative; }
+    .login-photo-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .av-jiwon { background: #155940; }
+    .av-soyoung { background: #ff8f00; }
+    .av-seulgi { background: #795548; }
+    .av-seona { background: #e91e63; }
+    .av-miri { background: #9c27b0; }
+    .av-mijeong { background: #3f51b5; }
+    .av-eunju { background: #00897b; }
+
+    /* ── 프로필 사진 ── */
+    .avatar-photo { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .avatar-photo-sm { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
+    .avatar-photo-xs { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+
+    /* ── 프로필 설정 ── */
+    .profile-photo-preview {
+      width: 100px; height: 100px; border-radius: 50%; margin: 0 auto;
+      overflow: hidden; border: 3px solid #e0e0e0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px; color: #fff; font-weight: bold;
+    }
+    .profile-btn {
+      background: none; border: none; font-size: 16px; cursor: pointer;
+      padding: 2px 6px; border-radius: 6px; color: #666;
+    }
+    .profile-btn:hover { background: #f0f0f0; }
 
     /* ── 앱 레이아웃 ── */
     .app { display: none; height: 100vh; }
@@ -55,7 +83,7 @@
       width: 100%; padding: 8px 16px 8px 36px; border: 1.5px solid #e0e0e0; border-radius: 10px;
       font-size: 14px; outline: none; background: #f9fafb;
     }
-    .global-search:focus { border-color: #667eea; background: #fff; }
+    .global-search:focus { border-color: #155940; background: #fff; }
     .search-wrapper { position: relative; }
     .search-wrapper::before { content: '🔍'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; }
     .header-right { display: flex; align-items: center; gap: 12px; }
@@ -92,8 +120,8 @@
       border-radius: 10px; cursor: pointer; color: #666; font-size: 14px;
       font-weight: 500; transition: all 0.15s; white-space: nowrap; margin-bottom: 2px;
     }
-    .nav-item:hover { background: #f0f4ff; color: #667eea; }
-    .nav-item.active { background: #e0e7ff; color: #667eea; font-weight: 700; }
+    .nav-item:hover { background: #e8f5e9; color: #155940; }
+    .nav-item.active { background: #d4edda; color: #155940; font-weight: 700; }
     .nav-item .nav-icon { font-size: 18px; flex-shrink: 0; width: 24px; text-align: center; }
     .nav-item .nav-label { overflow: hidden; }
     .sidebar.collapsed .nav-label { display: none; }
@@ -113,7 +141,7 @@
 
     /* ── 대시보드 ── */
     .dash-welcome { font-size: 22px; font-weight: 700; color: #333; margin-bottom: 20px; }
-    .dash-welcome span { color: #667eea; }
+    .dash-welcome span { color: #155940; }
     .dash-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
     .dash-card {
       background: #fff; border-radius: 14px; padding: 20px 16px;
@@ -124,7 +152,7 @@
     .dash-card .num { font-size: 32px; font-weight: 800; }
     .dash-card .label { font-size: 13px; color: #999; margin-top: 2px; }
     .num-urgent { color: #dc2626; } .num-progress { color: #f59e0b; }
-    .num-today { color: #667eea; } .num-done { color: #22c55e; }
+    .num-today { color: #155940; } .num-done { color: #2e7d32; }
     .dash-bottom { display: grid; grid-template-columns: 40% 30% 30%; gap: 20px; align-items: start; }
     .dash-section { background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); max-height: 360px; overflow-y: auto; }
     .dash-section-title { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 12px; }
@@ -133,9 +161,9 @@
       display: flex; align-items: center; gap: 10px;
       margin-bottom: 6px; border-left: 4px solid transparent; cursor: pointer;
     }
-    .today-task:hover { background: #f0f4ff; }
+    .today-task:hover { background: #e8f5e9; }
     .today-task.urgent { border-left-color: #dc2626; }
-    .today-task.normal { border-left-color: #667eea; }
+    .today-task.normal { border-left-color: #155940; }
     .today-task .tt-title { font-size: 13px; font-weight: 500; color: #333; flex: 1; }
     .today-task .tt-deadline { font-size: 11px; color: #f59e0b; white-space: nowrap; }
     .today-task .tt-deadline.overdue { color: #dc2626; font-weight: 600; }
@@ -148,7 +176,7 @@
       align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 11px;
       flex-shrink: 0;
     }
-    .tm-name { font-size: 13px; font-weight: 600; color: #333; width: 36px; }
+    .tm-name { font-size: 13px; font-weight: 600; color: #333; width: 46px; }
     .tm-bar { flex: 1; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
     .tm-bar-fill { height: 100%; border-radius: 4px; }
     .tm-count { font-size: 11px; color: #999; white-space: nowrap; }
@@ -162,19 +190,19 @@
       padding: 9px 14px; border: 1.5px solid #e0e0e0; border-radius: 10px;
       font-size: 14px; outline: none; flex: 1; min-width: 150px; max-width: 300px;
     }
-    .search-input:focus { border-color: #667eea; }
+    .search-input:focus { border-color: #155940; }
     .filter-chip {
       padding: 6px 14px; border: 1.5px solid #ddd; border-radius: 20px;
       font-size: 12px; cursor: pointer; background: #fff; user-select: none;
     }
-    .filter-chip.active { border-color: #667eea; background: #e0e7ff; color: #667eea; font-weight: 600; }
+    .filter-chip.active { border-color: #155940; background: #d4edda; color: #155940; font-weight: 600; }
 
     /* ── 업무 카드 ── */
     .category { margin-bottom: 16px; }
     .category-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .cat-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
     .badge-urgent { background: #fee2e2; color: #dc2626; }
-    .badge-normal { background: #e0e7ff; color: #4f46e5; }
+    .badge-normal { background: #d4edda; color: #1b7a4e; }
     .cat-count { font-size: 12px; color: #bbb; }
 
     .task-card {
@@ -185,14 +213,14 @@
     }
     .task-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }
     .task-card.urgent-border { border-left-color: #dc2626; }
-    .task-card.normal-border { border-left-color: #667eea; }
+    .task-card.normal-border { border-left-color: #155940; }
     .task-check {
       width: 22px; height: 22px; border: 2px solid #ddd; border-radius: 50%;
       flex-shrink: 0; margin-top: 1px; cursor: pointer; transition: all 0.2s;
       display: flex; align-items: center; justify-content: center;
     }
-    .task-check:hover { border-color: #22c55e; }
-    .task-check.checked { background: #22c55e; border-color: #22c55e; }
+    .task-check:hover { border-color: #2e7d32; }
+    .task-check.checked { background: #2e7d32; border-color: #2e7d32; }
     .task-check.checked::after { content: '✓'; color: #fff; font-size: 12px; font-weight: bold; }
     .task-info { flex: 1; min-width: 0; }
     .task-title { font-size: 14px; color: #333; font-weight: 500; }
@@ -217,7 +245,7 @@
     .detail-divider { height: 1px; background: #eee; margin: 16px 0; }
     .memo-area { background: #f9fafb; border: 1px solid #eee; border-radius: 10px; padding: 12px; min-height: 60px; font-size: 13px; color: #555; line-height: 1.8; }
     .memo-entry { padding: 3px 0; }
-    .memo-date { color: #667eea; font-weight: 600; margin-right: 6px; }
+    .memo-date { color: #155940; font-weight: 600; margin-right: 6px; }
     .empty-detail { text-align: center; color: #aaa; padding: 60px 20px; font-size: 14px; background: #fafafa; border-radius: 12px; }
 
     /* ── 칸반 ── */
@@ -226,22 +254,22 @@
     .kanban-col { background: #f5f5f5; border-radius: 14px; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; }
     .kanban-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #ddd; flex-shrink: 0; }
     .kanban-title { font-size: 14px; font-weight: 700; }
-    .kanban-count { background: #e0e7ff; color: #667eea; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 12px; }
+    .kanban-count { background: #d4edda; color: #155940; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 12px; }
     .kanban-header.todo-h { border-bottom-color: #94a3b8; }
     .kanban-header.progress-h { border-bottom-color: #f59e0b; }
-    .kanban-header.done-h { border-bottom-color: #22c55e; }
+    .kanban-header.done-h { border-bottom-color: #2e7d32; }
     .kanban-card {
       background: #fff; border-radius: 10px; padding: 12px; margin-bottom: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.06); cursor: grab; transition: all 0.15s;
     }
     .kanban-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
     .kanban-card.dragging { opacity: 0.4; transform: scale(0.95); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-    .kanban-col.drag-over { background: #e8edff; border: 2px dashed #667eea; }
+    .kanban-col.drag-over { background: #c8e6c9; border: 2px dashed #155940; }
     .kc-title { font-size: 13px; font-weight: 500; color: #333; margin-bottom: 6px; }
     .kc-meta { display: flex; gap: 6px; flex-wrap: wrap; }
     .kc-priority { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
     .kc-p-urgent { background: #fee2e2; color: #dc2626; }
-    .kc-p-normal { background: #e0e7ff; color: #4f46e5; }
+    .kc-p-normal { background: #d4edda; color: #1b7a4e; }
     .kc-deadline { font-size: 11px; color: #999; }
     .kc-assignees { display: flex; margin-top: 6px; }
     .kc-av { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; font-weight: bold; margin-right: -4px; border: 2px solid #fff; }
@@ -255,11 +283,11 @@
     .cal-nav-btn { background: #fff; border: 1px solid #ddd; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
     .cal-nav-btn:hover { background: #f0f0f0; }
     .cal-month { font-size: 20px; font-weight: 700; color: #333; min-width: 130px; text-align: center; }
-    .cal-today-btn { background: #667eea; color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 600; }
-    .cal-today-btn:hover { background: #5a6fd6; }
+    .cal-today-btn { background: #155940; color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 600; }
+    .cal-today-btn:hover { background: #0e4a33; }
     .cal-view-toggle { display: flex; background: #f0f0f0; border-radius: 10px; overflow: hidden; }
     .cal-view-btn { padding: 7px 16px; font-size: 13px; cursor: pointer; border: none; background: transparent; font-weight: 500; color: #999; }
-    .cal-view-btn.active { background: #667eea; color: #fff; font-weight: 700; }
+    .cal-view-btn.active { background: #155940; color: #fff; font-weight: 700; }
     .cal-filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
     .cal-filter-label { font-size: 12px; color: #999; font-weight: 600; margin-right: 4px; }
     .cal-filter-chip {
@@ -270,7 +298,7 @@
     .cal-filter-chip.active { font-weight: 600; }
     .cal-filter-chip.cf-task.active { border-color: #dc2626; background: #fee2e2; color: #dc2626; }
     .cal-filter-chip.cf-meeting.active { border-color: #f59e0b; background: #fef3c7; color: #d97706; }
-    .cal-filter-chip.cf-leave.active { border-color: #22c55e; background: #dcfce7; color: #16a34a; }
+    .cal-filter-chip.cf-leave.active { border-color: #22c55e; background: #c8e6c9; color: #2e7d32; }
     .cal-filter-chip.cf-event.active { border-color: #7c3aed; background: #ede9fe; color: #7c3aed; }
     .cal-filter-divider { width: 1px; height: 24px; background: #e0e0e0; margin: 0 6px; }
     .calendar { background: #fff; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; }
@@ -288,9 +316,9 @@
     .cal-day:nth-child(7n) { border-right: none; }
     .cal-day.other-month { background: #fafafa; }
     .cal-day.other-month .day-num { color: #ddd; }
-    .cal-day.today { background: #f0f4ff; }
-    .cal-day.today .day-num { background: #667eea; color: #fff; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
-    .cal-day.selected { background: #e8edff; }
+    .cal-day.today { background: #e8f5e9; }
+    .cal-day.today .day-num { background: #155940; color: #fff; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
+    .cal-day.selected { background: #c8e6c9; }
     .day-num { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px; }
     .cal-day:nth-child(7n+1) .day-num { color: #dc2626; }
     .cal-day:nth-child(7n) .day-num { color: #2563eb; }
@@ -299,13 +327,13 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
     }
     .cal-event.ev-task { background: #fee2e2; color: #dc2626; }
-    .cal-event.ev-task-normal { background: #e0e7ff; color: #4f46e5; }
+    .cal-event.ev-task-normal { background: #d4edda; color: #1b7a4e; }
     .cal-event.ev-meeting { background: #fef3c7; color: #d97706; }
-    .cal-event.ev-leave { background: #dcfce7; color: #16a34a; }
+    .cal-event.ev-leave { background: #c8e6c9; color: #2e7d32; }
     .cal-event.ev-event { background: #ede9fe; color: #7c3aed; }
     .cal-event.ev-done { background: #f3f4f6; color: #999; text-decoration: line-through; }
     .cal-more { font-size: 10px; color: #999; padding: 2px 0; cursor: pointer; }
-    .cal-more:hover { color: #667eea; }
+    .cal-more:hover { color: #155940; }
 
     /* 캘린더 우측 패널 */
     .cal-detail-panel {
@@ -313,8 +341,8 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     }
     .cal-sel-title { font-size: 16px; font-weight: 700; color: #333; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
-    .cal-sel-add { background: #667eea; color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 600; }
-    .cal-sel-add:hover { background: #5a6fd6; }
+    .cal-sel-add { background: #155940; color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 600; }
+    .cal-sel-add:hover { background: #0e4a33; }
     .cal-sel-task {
       display: flex; align-items: center; gap: 10px; padding: 10px 0;
       border-bottom: 1px solid #f5f5f5;
@@ -328,38 +356,42 @@
     .cst-type { font-size: 10px; padding: 2px 8px; border-radius: 10px; }
     .cst-type-task { background: #fee2e2; color: #dc2626; }
     .cst-type-meeting { background: #fef3c7; color: #d97706; }
-    .cst-type-leave { background: #dcfce7; color: #16a34a; }
+    .cst-type-leave { background: #c8e6c9; color: #2e7d32; }
     .cst-type-event { background: #ede9fe; color: #7c3aed; }
 
     /* ── 팀 업무 ── */
-    .team-toolbar { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; }
+    .team-toolbar { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
     .team-chip { padding: 7px 16px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 500; border: 2px solid #eee; background: #fff; }
     .team-chip.active { color: #fff; border-color: transparent; }
-    .team-chip.tc-all.active { background: #667eea; }
-    .team-chip.tc-jiwon.active { background: #667eea; }
-    .team-chip.tc-soyoung.active { background: #f093fb; }
-    .team-chip.tc-seulgi.active { background: #4facfe; }
+    .team-chip.tc-all.active { background: #155940; }
+    .team-chip.tc-jiwon.active { background: #155940; }
+    .team-chip.tc-soyoung.active { background: #ff8f00; }
+    .team-chip.tc-seulgi.active { background: #795548; }
+    .team-chip.tc-seona.active { background: #e91e63; }
+    .team-chip.tc-miri.active { background: #9c27b0; }
+    .team-chip.tc-mijeong.active { background: #3f51b5; }
+    .team-chip.tc-eunju.active { background: #00897b; }
     .view-toggle { display: flex; background: #f0f0f0; border-radius: 10px; overflow: hidden; margin-left: auto; }
     .view-btn { padding: 7px 14px; font-size: 13px; cursor: pointer; border: none; background: transparent; font-weight: 500; color: #999; }
-    .view-btn.active { background: #667eea; color: #fff; font-weight: 700; }
+    .view-btn.active { background: #155940; color: #fff; font-weight: 700; }
     .team-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
     .team-table th { background: #f9fafb; padding: 12px 16px; font-size: 13px; color: #999; font-weight: 600; text-align: left; cursor: pointer; user-select: none; }
     .team-table th:hover { background: #f0f0f0; }
     .team-table td { padding: 12px 16px; font-size: 14px; color: #333; border-top: 1px solid #f0f0f0; }
     .team-table tr:hover td { background: #f9fafb; }
-    .team-card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .team-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
 
     /* ── 회의록 ── */
-    .meeting-card { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.15s; border-left: 4px solid #10b981; }
+    .meeting-card { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.15s; border-left: 4px solid #2e7d32; }
     .meeting-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-    .meeting-card.selected-meeting { border-left-color: #667eea; background: #f8f9ff; }
+    .meeting-card.selected-meeting { border-left-color: #155940; background: #f0f9f1; }
     .meeting-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-    .meeting-date-badge { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 700; background: #dcfce7; color: #16a34a; }
+    .meeting-date-badge { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 700; background: #c8e6c9; color: #2e7d32; }
     .meeting-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 4px; }
     .meeting-agenda { font-size: 13px; color: #999; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .meeting-footer { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: 12px; color: #999; }
-    .meeting-add-btn { background: #10b981; color: #fff; border: none; padding: 9px 20px; border-radius: 10px; font-size: 13px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
-    .meeting-add-btn:hover { background: #059669; }
+    .meeting-add-btn { background: #2e7d32; color: #fff; border: none; padding: 9px 20px; border-radius: 10px; font-size: 13px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    .meeting-add-btn:hover { background: #1b5e20; }
     .meeting-detail-panel { background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
     .meeting-detail-section { margin-top: 16px; }
     .meeting-detail-label { font-size: 12px; color: #999; font-weight: 600; margin-bottom: 6px; }
@@ -367,7 +399,7 @@
     .meeting-action-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
     .meeting-action-item:last-child { border-bottom: none; }
     .meeting-action-check { width: 18px; height: 18px; border: 2px solid #ddd; border-radius: 4px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; }
-    .meeting-action-check.mac-checked { background: #22c55e; border-color: #22c55e; color: #fff; }
+    .meeting-action-check.mac-checked { background: #2e7d32; border-color: #2e7d32; color: #fff; }
     .meeting-action-text { font-size: 13px; color: #333; flex: 1; }
     .meeting-action-who { font-size: 11px; color: #999; white-space: nowrap; }
 
@@ -377,7 +409,7 @@
       flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 14px;
       font-weight: 500; color: #999; border-bottom: 3px solid transparent; transition: all 0.2s;
     }
-    .notice-tab.active { color: #667eea; border-bottom-color: #667eea; font-weight: 700; background: #f8f9ff; }
+    .notice-tab.active { color: #155940; border-bottom-color: #155940; font-weight: 700; background: #f0f9f1; }
     .notice-tab .tab-badge {
       display: inline-flex; align-items: center; justify-content: center;
       background: #dc2626; color: #fff; font-size: 10px; font-weight: 700;
@@ -386,17 +418,17 @@
     .notice-card {
       background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.15s;
-      border-left: 4px solid #667eea;
+      border-left: 4px solid #155940;
     }
     .notice-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
     .notice-card.unread-notice { border-left-color: #dc2626; background: #fffbfb; }
     .notice-card.read-notice { opacity: 0.7; border-left-color: #ddd; }
-    .notice-card.selected-notice { border-left-color: #667eea; background: #f8f9ff; }
+    .notice-card.selected-notice { border-left-color: #155940; background: #f0f9f1; }
     .notice-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
     .notice-type { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 700; }
     .nt-sale { background: #fef3c7; color: #d97706; }
     .nt-gift { background: #ede9fe; color: #7c3aed; }
-    .nt-general { background: #e0e7ff; color: #4f46e5; }
+    .nt-general { background: #d4edda; color: #1b7a4e; }
     .notice-date { font-size: 11px; color: #bbb; }
     .notice-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #dc2626; flex-shrink: 0; }
     .notice-title-text { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 4px; }
@@ -407,15 +439,15 @@
     .read-avatars { display: flex; margin-left: 4px; }
     .read-av { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; font-weight: bold; margin-right: -3px; border: 2px solid #fff; }
     .unread-av { opacity: 0.3; }
-    .notice-add-btn { background: #667eea; color: #fff; border: none; padding: 9px 20px; border-radius: 10px; font-size: 13px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
-    .notice-add-btn:hover { background: #5a6fd6; }
+    .notice-add-btn { background: #155940; color: #fff; border: none; padding: 9px 20px; border-radius: 10px; font-size: 13px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    .notice-add-btn:hover { background: #0e4a33; }
     .notice-detail-panel { background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
     .notice-detail-content { background: #f9fafb; border-radius: 12px; padding: 20px; font-size: 15px; color: #444; line-height: 1.9; min-height: 120px; white-space: pre-wrap; }
     .notice-read-section { margin-top: 16px; padding-top: 14px; border-top: 1px solid #eee; }
     .notice-read-title { font-size: 12px; color: #999; font-weight: 600; margin-bottom: 8px; }
-    .notice-read-list { display: flex; gap: 12px; }
+    .notice-read-list { display: flex; gap: 12px; flex-wrap: wrap; }
     .notice-read-person { display: flex; align-items: center; gap: 6px; font-size: 13px; }
-    .notice-read-person.is-read { color: #22c55e; }
+    .notice-read-person.is-read { color: #2e7d32; }
     .notice-read-person.not-read { color: #ccc; }
 
     /* ── 월별 리포트 ── */
@@ -431,13 +463,13 @@
     .report-section { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
     .report-section-title { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 14px; }
     .completed-task { background: #f9fafb; border-radius: 10px; padding: 10px 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
-    .ct-check { color: #22c55e; font-size: 16px; font-weight: bold; }
+    .ct-check { color: #2e7d32; font-size: 16px; font-weight: bold; }
     .ct-title { font-size: 13px; color: #999; text-decoration: line-through; flex: 1; }
     .ct-who { font-size: 11px; color: #bbb; }
     .ct-date { font-size: 11px; color: #bbb; }
     .bar-chart { display: flex; flex-direction: column; gap: 12px; }
     .bar-row { display: flex; align-items: center; gap: 10px; }
-    .bar-label { font-size: 13px; font-weight: 600; width: 40px; }
+    .bar-label { font-size: 13px; font-weight: 600; width: 50px; }
     .bar-track { flex: 1; height: 28px; background: #f0f0f0; border-radius: 8px; overflow: hidden; position: relative; }
     .bar-fill { height: 100%; border-radius: 8px; display: flex; align-items: center; padding-left: 10px; font-size: 12px; color: #fff; font-weight: 700; transition: width 0.5s ease; }
     .bar-value { font-size: 13px; color: #666; width: 40px; text-align: right; }
@@ -445,11 +477,11 @@
     /* ── 개인 메모 ── */
     .memo-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .memo-section-title { font-size: 16px; font-weight: 700; color: #333; }
-    .memo-add-btn { background: #f59e0b; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 600; }
-    .memo-add-btn:hover { background: #d97706; }
+    .memo-add-btn { background: #8d6e63; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 600; }
+    .memo-add-btn:hover { background: #6d4c41; }
     .memo-search { padding: 9px 14px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 14px; outline: none; width: 100%; margin-bottom: 12px; }
-    .memo-search:focus { border-color: #f59e0b; }
-    .memo-card-item { background: #fffdf7; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; border-left: 4px solid #fbbf24; transition: all 0.15s; }
+    .memo-search:focus { border-color: #8d6e63; }
+    .memo-card-item { background: #faf6f3; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; border-left: 4px solid #a1887f; transition: all 0.15s; }
     .memo-card-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
     .memo-card-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; }
     .memo-card-preview { font-size: 12px; color: #999; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -465,7 +497,7 @@
     .notif-header { padding: 14px 16px; font-size: 15px; font-weight: 700; border-bottom: 1px solid #eee; }
     .notif-item { padding: 10px 16px; border-bottom: 1px solid #f5f5f5; cursor: pointer; }
     .notif-item:hover { background: #f9fafb; }
-    .notif-item.unread { background: #f0f4ff; }
+    .notif-item.unread { background: #e8f5e9; }
     .notif-text { font-size: 13px; color: #333; }
     .notif-time { font-size: 11px; color: #bbb; margin-top: 3px; }
 
@@ -481,35 +513,35 @@
     }
     .modal h3 { font-size: 18px; margin-bottom: 18px; color: #333; }
     .modal label { font-size: 12px; color: #888; display: block; margin-bottom: 5px; margin-top: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .modal input[type="text"], .modal input[type="date"], .modal textarea, .modal select {
+    .modal input[type="text"], .modal input[type="date"], .modal input[type="number"], .modal textarea, .modal select {
       width: 100%; padding: 10px 12px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 14px; outline: none; font-family: inherit;
     }
-    .modal input:focus, .modal textarea:focus, .modal select:focus { border-color: #667eea; }
+    .modal input:focus, .modal textarea:focus, .modal select:focus { border-color: #155940; }
     .modal textarea { resize: vertical; min-height: 70px; }
     .modal-btns { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
     .btn-cancel { padding: 10px 20px; border: 1px solid #ddd; background: #fff; border-radius: 10px; cursor: pointer; font-size: 14px; color: #666; }
     .btn-cancel:hover { background: #f5f5f5; }
     .btn-delete { padding: 10px 20px; border: none; background: #fee2e2; color: #dc2626; border-radius: 10px; cursor: pointer; font-size: 14px; margin-right: auto; }
     .btn-delete:hover { background: #fecaca; }
-    .btn-submit { padding: 10px 20px; border: none; background: #667eea; color: #fff; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; }
-    .btn-submit:hover { background: #5a6fd6; }
+    .btn-submit { padding: 10px 20px; border: none; background: #155940; color: #fff; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; }
+    .btn-submit:hover { background: #0e4a33; }
     .priority-selector, .status-selector { display: flex; gap: 8px; margin-top: 4px; }
     .priority-option, .status-option { padding: 9px 20px; border: 2px solid #eee; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; }
     .priority-option.sel-urgent { border-color: #dc2626; background: #fee2e2; color: #dc2626; }
-    .priority-option.sel-normal { border-color: #4f46e5; background: #e0e7ff; color: #4f46e5; }
+    .priority-option.sel-normal { border-color: #1b7a4e; background: #d4edda; color: #1b7a4e; }
     .status-option.sel-todo { border-color: #94a3b8; background: #f1f5f9; color: #475569; }
     .status-option.sel-progress { border-color: #f59e0b; background: #fef3c7; color: #d97706; }
-    .status-option.sel-done { border-color: #22c55e; background: #dcfce7; color: #16a34a; }
-    .assignee-chips { display: flex; gap: 8px; margin-top: 4px; }
+    .status-option.sel-done { border-color: #2e7d32; background: #c8e6c9; color: #2e7d32; }
+    .assignee-chips { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
     .assignee-chip { padding: 8px 16px; border: 2px solid #eee; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 500; }
-    .assignee-chip.selected { border-color: #667eea; background: #e0e7ff; color: #667eea; }
+    .assignee-chip.selected { border-color: #155940; background: #d4edda; color: #155940; }
     .notice-modal { width: 720px; }
     .notice-content-area {
       width: 100%; min-height: 250px; padding: 14px; border: 1.5px solid #e0e0e0;
       border-radius: 12px; font-size: 15px; outline: none; font-family: inherit;
       line-height: 1.8; resize: vertical;
     }
-    .notice-content-area:focus { border-color: #667eea; }
+    .notice-content-area:focus { border-color: #155940; }
 
     /* ── 전체 검색 결과 ── */
     .search-results {
@@ -522,7 +554,7 @@
     .search-result-item {
       padding: 10px 14px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px;
     }
-    .search-result-item:hover { background: #f0f4ff; }
+    .search-result-item:hover { background: #e8f5e9; }
     .sr-icon { font-size: 16px; flex-shrink: 0; }
     .sr-info { flex: 1; }
     .sr-title { font-size: 14px; color: #333; font-weight: 500; }
@@ -538,7 +570,7 @@
       padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; color: #333;
       display: flex; align-items: center; gap: 8px;
     }
-    .ctx-item:hover { background: #f0f4ff; color: #667eea; }
+    .ctx-item:hover { background: #e8f5e9; color: #155940; }
     .ctx-item.ctx-danger { color: #dc2626; }
     .ctx-item.ctx-danger:hover { background: #fef2f2; }
     .ctx-divider { height: 1px; background: #eee; margin: 4px 0; }
@@ -562,21 +594,143 @@
     .pw-week-label { font-size: 13px; color: #666; min-width: 120px; text-align: center; }
     .pw-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
     .pw-day { background: #f9fafb; border-radius: 10px; padding: 10px 8px; min-height: 80px; }
-    .pw-day.pw-today { background: #f0f4ff; border: 2px solid #667eea; }
+    .pw-day.pw-today { background: #e8f5e9; border: 2px solid #155940; }
     .pw-day-header { font-size: 12px; font-weight: 700; color: #999; margin-bottom: 6px; display: flex; justify-content: space-between; }
     .pw-day-header .pw-date { color: #333; }
     .pw-task-item { font-size: 11px; padding: 4px 6px; border-radius: 6px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
     .pw-task-item.pw-fixed { background: #fff7ed; border: 1.5px dashed #f59e0b; color: #92400e; }
-    .pw-task-item.pw-normal { background: #e0e7ff; color: #4f46e5; }
+    .pw-task-item.pw-normal { background: #d4edda; color: #1b7a4e; }
     .pw-task-item.pw-urgent { background: #fee2e2; color: #dc2626; }
     .pw-task-check { width: 14px; height: 14px; border: 1.5px solid #ccc; border-radius: 3px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 9px; }
-    .pw-task-check.pw-checked { background: #22c55e; border-color: #22c55e; color: #fff; }
+    .pw-task-check.pw-checked { background: #2e7d32; border-color: #2e7d32; color: #fff; }
     .pw-task-label { flex: 1; font-size: 11px; }
 
     /* ── 내 업무 하위 탭 ── */
     .sub-tabs { display: flex; gap: 0; margin-bottom: 14px; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); width: fit-content; }
     .sub-tab { padding: 8px 20px; cursor: pointer; font-size: 13px; font-weight: 500; color: #999; border-bottom: 3px solid transparent; }
-    .sub-tab.active { color: #667eea; border-bottom-color: #667eea; font-weight: 700; background: #f8f9ff; }
+    .sub-tab.active { color: #155940; border-bottom-color: #155940; font-weight: 700; background: #f0f9f1; }
+
+    /* ── 반복 업무 ── */
+    .recurring-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .recurring-title { font-size: 20px; font-weight: 700; color: #333; }
+    .recurring-add-btn { background: #155940; color: #fff; border: none; padding: 9px 20px; border-radius: 10px; font-size: 13px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    .recurring-add-btn:hover { background: #0e4a33; }
+    .recurring-filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .recurring-card {
+      background: #fff; border-radius: 14px; padding: 18px; margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05); transition: all 0.15s;
+    }
+    .recurring-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .recurring-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .recurring-card-title { font-size: 15px; font-weight: 600; color: #333; flex: 1; }
+    .cycle-badge { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 700; }
+    .cycle-weekly { background: #d4edda; color: #155940; }
+    .cycle-monthly { background: #dbeafe; color: #2563eb; }
+    .cycle-yearly { background: #fce7f3; color: #be185d; }
+    .recurring-day-info { font-size: 12px; color: #999; }
+    .recurring-assignees { font-size: 12px; color: #666; margin-bottom: 10px; }
+    .recurring-timeline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .timeline-month { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .timeline-label { font-size: 10px; color: #999; }
+    .timeline-check {
+      width: 28px; height: 28px; border: 2px solid #ddd; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 14px; transition: all 0.15s; background: #fff;
+    }
+    .timeline-check.done { background: #c8e6c9; border-color: #2e7d32; color: #2e7d32; }
+    .timeline-check:hover { border-color: #155940; }
+
+    /* ── 팀 목표 ── */
+    .goals-section { margin-bottom: 28px; }
+    .goals-section-title { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .goals-nav { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+    .goals-nav-btn { background: #fff; border: 1px solid #ddd; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+    .goals-nav-btn:hover { background: #f0f0f0; }
+    .goals-month-label { font-size: 14px; font-weight: 600; color: #333; min-width: 80px; text-align: center; }
+    .goal-card {
+      background: #fff; border-radius: 14px; padding: 20px; margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05); transition: all 0.15s;
+    }
+    .goal-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .goal-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .goal-card-title { font-size: 15px; font-weight: 600; color: #333; flex: 1; }
+    .goal-edit-btn { background: none; border: 1px solid #ddd; padding: 4px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; color: #666; }
+    .goal-edit-btn:hover { background: #f0f0f0; }
+    .goal-progress-bar { height: 12px; background: #f0f0f0; border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
+    .goal-progress-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease; }
+    .goal-progress-fill.red { background: #dc2626; }
+    .goal-progress-fill.yellow { background: #f59e0b; }
+    .goal-progress-fill.green { background: #2e7d32; }
+    .goal-progress-text { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .goal-progress-text.red { color: #dc2626; }
+    .goal-progress-text.yellow { color: #f59e0b; }
+    .goal-progress-text.green { color: #2e7d32; }
+    .goal-notes { font-size: 13px; color: #999; }
+    .goal-add-btn { background: #155940; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 600; }
+    .goal-add-btn:hover { background: #0e4a33; }
+
+    /* ── AI 채팅 플로팅 ── */
+    .chat-fab {
+      position: fixed; bottom: 28px; right: 28px; z-index: 500;
+      width: 60px; height: 60px; border-radius: 50%; border: none;
+      background: linear-gradient(135deg, #155940, #3e6042);
+      color: #fff; font-size: 28px; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(21,89,64,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: none; align-items: center; justify-content: center;
+    }
+    .chat-fab:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(21,89,64,0.5); }
+    .chat-fab.active { background: #dc2626; }
+
+    .chat-float-panel {
+      display: none; position: fixed; bottom: 100px; right: 28px; z-index: 500;
+      width: 400px; height: 520px; background: #fff; border-radius: 20px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.2); flex-direction: column; overflow: hidden;
+    }
+    .chat-float-panel.show { display: flex; }
+    .chat-float-header {
+      background: linear-gradient(135deg, #155940, #3e6042); color: #fff;
+      padding: 14px 18px; font-size: 15px; font-weight: 700;
+      display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    .chat-float-close, .chat-float-clear {
+      background: rgba(255,255,255,0.2); border: none; color: #fff;
+      width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+      font-size: 14px; display: flex; align-items: center; justify-content: center;
+    }
+    .chat-float-close:hover, .chat-float-clear:hover { background: rgba(255,255,255,0.3); }
+
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+    }
+    .chat-msg { display: flex; gap: 10px; max-width: 85%; }
+    .chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .chat-msg.bot { align-self: flex-start; }
+    .chat-avatar {
+      width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 16px; flex-shrink: 0;
+    }
+    .chat-avatar.bot-av { background: #d4edda; }
+    .chat-avatar.user-av { background: #155940; color: #fff; font-size: 12px; font-weight: bold; }
+    .chat-bubble {
+      padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.6;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .chat-msg.bot .chat-bubble { background: #e8f5e9; color: #333; border-bottom-left-radius: 4px; }
+    .chat-msg.user .chat-bubble { background: #155940; color: #fff; border-bottom-right-radius: 4px; }
+    .chat-input-area {
+      display: flex; gap: 8px; padding: 12px; border-top: 1px solid #eee; flex-shrink: 0;
+    }
+    .chat-input {
+      flex: 1; padding: 9px 14px; border: 1.5px solid #e0e0e0; border-radius: 12px;
+      font-size: 13px; outline: none; font-family: inherit;
+    }
+    .chat-input:focus { border-color: #155940; }
+    .chat-send-btn {
+      background: #155940; color: #fff; border: none; padding: 9px 16px;
+      border-radius: 12px; cursor: pointer; font-size: 13px; font-weight: 600;
+    }
+    .chat-send-btn:hover { background: #0e4a33; }
   </style>
 </head>
 <body>
@@ -585,10 +739,47 @@
 <div class="login-screen" id="loginScreen">
   <h1>팀 업무 관리</h1>
   <p>누구로 접속할까요?</p>
-  <div class="login-cards">
-    <div class="login-card" onclick="login('지원','jiwon')"><div class="avatar av-jiwon">지</div><div class="name">지원</div><div class="role">프로젝트 리더</div></div>
-    <div class="login-card" onclick="login('소영','soyoung')"><div class="avatar av-soyoung">소</div><div class="name">소영</div><div class="role">팀원</div></div>
-    <div class="login-card" onclick="login('슬기','seulgi')"><div class="avatar av-seulgi">슬</div><div class="name">슬기</div><div class="role">팀원</div></div>
+  <div class="login-sections">
+    <!-- 상담파트 -->
+    <div class="login-dept">
+      <div class="login-dept-label">💬 상담파트</div>
+      <div class="login-cards">
+        <div class="login-card" onclick="login('이선아','seona')">
+          <div class="login-photo-wrap" id="loginPhoto-seona"><div class="avatar av-seona">선</div></div>
+          <div class="name">이선아</div>
+        </div>
+        <div class="login-card" onclick="login('이미리','miri')">
+          <div class="login-photo-wrap" id="loginPhoto-miri"><div class="avatar av-miri">미</div></div>
+          <div class="name">이미리</div>
+        </div>
+        <div class="login-card" onclick="login('김미정','mijeong')">
+          <div class="login-photo-wrap" id="loginPhoto-mijeong"><div class="avatar av-mijeong">정</div></div>
+          <div class="name">김미정</div>
+        </div>
+        <div class="login-card" onclick="login('정은주','eunju')">
+          <div class="login-photo-wrap" id="loginPhoto-eunju"><div class="avatar av-eunju">은</div></div>
+          <div class="name">정은주</div>
+        </div>
+      </div>
+    </div>
+    <!-- 쇼핑몰운영파트 -->
+    <div class="login-dept">
+      <div class="login-dept-label">🛒 쇼핑몰운영파트</div>
+      <div class="login-cards">
+        <div class="login-card" onclick="login('임소영','soyoung')">
+          <div class="login-photo-wrap" id="loginPhoto-soyoung"><div class="avatar av-soyoung">소</div></div>
+          <div class="name">임소영</div>
+        </div>
+        <div class="login-card" onclick="login('박슬기','seulgi')">
+          <div class="login-photo-wrap" id="loginPhoto-seulgi"><div class="avatar av-seulgi">슬</div></div>
+          <div class="name">박슬기</div>
+        </div>
+        <div class="login-card" onclick="login('이지원','jiwon')">
+          <div class="login-photo-wrap" id="loginPhoto-jiwon"><div class="avatar av-jiwon">지</div></div>
+          <div class="name">이지원</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -609,7 +800,8 @@
     <div class="header-right">
       <button class="notif-btn" onclick="toggleNotif()">🔔<span class="notif-badge" id="notifBadge">3</span></button>
       <div class="avatar-sm" id="headerAvatar">지</div>
-      <span style="font-size:13px;color:#666;font-weight:500;" id="headerName">지원</span>
+      <span style="font-size:13px;color:#666;font-weight:500;" id="headerName">이지원</span>
+      <button class="profile-btn" onclick="openProfileModal()" title="프로필 설정">⚙️</button>
       <button class="logout-btn" onclick="logout()">로그아웃</button>
     </div>
   </div>
@@ -629,6 +821,9 @@
         <div class="nav-item" data-tab="monthly" onclick="navTo('monthly',this)" title="8. 월별 리포트"><span class="nav-icon">📊</span><span class="nav-label">월별 리포트</span></div>
         <div class="nav-divider"></div>
         <div class="nav-item" data-tab="memo" onclick="navTo('memo',this)" title="9. 내 메모"><span class="nav-icon">🗒️</span><span class="nav-label">내 메모</span></div>
+        <div class="nav-divider"></div>
+        <div class="nav-item" data-tab="recurring" onclick="navTo('recurring',this)" title="10. 반복 업무"><span class="nav-icon">🔄</span><span class="nav-label">반복 업무</span></div>
+        <div class="nav-item" data-tab="goals" onclick="navTo('goals',this)" title="11. 팀 목표"><span class="nav-icon">🎯</span><span class="nav-label">팀 목표</span></div>
       </nav>
     </div>
 
@@ -638,7 +833,7 @@
 
         <!-- ── 1. 대시보드 ── -->
         <div class="tab-content active" id="tab-dashboard">
-          <div class="dash-welcome">안녕하세요, <span id="dashName">지원</span>님!</div>
+          <div class="dash-welcome">안녕하세요, <span id="dashName">이지원</span>님!</div>
           <div class="dash-grid" id="dashGrid"></div>
           <div class="dash-bottom">
             <div class="dash-section">
@@ -702,17 +897,7 @@
 
         <!-- ── 3. 칸반보드 ── -->
         <div class="tab-content" id="tab-kanban">
-          <div class="kanban-toolbar" id="kanbanToolbar">
-            <div class="filter-chip active" data-group="assignee" onclick="toggleKanbanFilter(this,'all')">전체</div>
-            <div class="filter-chip" data-group="assignee" onclick="toggleKanbanFilter(this,'지원')">지원</div>
-            <div class="filter-chip" data-group="assignee" onclick="toggleKanbanFilter(this,'소영')">소영</div>
-            <div class="filter-chip" data-group="assignee" onclick="toggleKanbanFilter(this,'슬기')">슬기</div>
-            <div style="margin-left:auto;display:flex;gap:8px;">
-              <div class="filter-chip active" data-group="priority" onclick="toggleKanbanPriority(this,'all')">전체</div>
-              <div class="filter-chip" data-group="priority" onclick="toggleKanbanPriority(this,'urgent')">🔴 긴급</div>
-              <div class="filter-chip" data-group="priority" onclick="toggleKanbanPriority(this,'normal')">🔵 일보따리</div>
-            </div>
-          </div>
+          <div class="kanban-toolbar" id="kanbanToolbar"></div>
           <div class="kanban" id="kanbanBoard"></div>
         </div>
 
@@ -732,19 +917,7 @@
               <button class="cal-view-btn" onclick="switchCalView('week',this)">주간</button>
             </div>
           </div>
-          <div class="cal-filters">
-            <span class="cal-filter-label">종류</span>
-            <div class="cal-filter-chip cf-task active" onclick="toggleCalFilter(this)">🔴 업무</div>
-            <div class="cal-filter-chip cf-meeting active" onclick="toggleCalFilter(this)">🟡 회의</div>
-            <div class="cal-filter-chip cf-leave active" onclick="toggleCalFilter(this)">🟢 연차</div>
-            <div class="cal-filter-chip cf-event active" onclick="toggleCalFilter(this)">🟣 이벤트</div>
-            <div class="cal-filter-divider"></div>
-            <span class="cal-filter-label">팀원</span>
-            <div class="cal-filter-chip active" onclick="toggleCalFilter(this)" style="border-color:#667eea;background:#e0e7ff;color:#667eea;">전체</div>
-            <div class="cal-filter-chip" onclick="toggleCalFilter(this)">지원</div>
-            <div class="cal-filter-chip" onclick="toggleCalFilter(this)">소영</div>
-            <div class="cal-filter-chip" onclick="toggleCalFilter(this)">슬기</div>
-          </div>
+          <div class="cal-filters" id="calFilters"></div>
           <div class="split-view">
             <div class="split-left" style="width:65%;">
               <div id="monthView">
@@ -774,16 +947,7 @@
 
         <!-- ── 5. 팀 업무 ── -->
         <div class="tab-content" id="tab-team">
-          <div class="team-toolbar">
-            <div class="team-chip tc-all active" onclick="filterTeam(this,'all')">전체</div>
-            <div class="team-chip tc-jiwon" onclick="filterTeam(this,'지원')">지원</div>
-            <div class="team-chip tc-soyoung" onclick="filterTeam(this,'소영')">소영</div>
-            <div class="team-chip tc-seulgi" onclick="filterTeam(this,'슬기')">슬기</div>
-            <div class="view-toggle">
-              <button class="view-btn active" onclick="switchTeamView('table',this)">테이블</button>
-              <button class="view-btn" onclick="switchTeamView('card',this)">카드</button>
-            </div>
-          </div>
+          <div class="team-toolbar" id="teamToolbar"></div>
           <div id="teamContent"></div>
         </div>
 
@@ -854,6 +1018,31 @@
           <div id="memoList"></div>
         </div>
 
+        <!-- ── 10. 반복 업무 ── -->
+        <div class="tab-content" id="tab-recurring">
+          <div class="recurring-header">
+            <span class="recurring-title">🔄 반복 업무 관리</span>
+            <button class="recurring-add-btn" onclick="openModal('recurringAddModal')">+ 반복 업무 등록</button>
+          </div>
+          <div class="recurring-filters" id="recurringCycleFilter">
+            <span style="font-size:12px;color:#999;font-weight:600;margin-right:4px;">주기</span>
+            <div class="filter-chip active" onclick="filterRecurring(this,'all')">전체</div>
+            <div class="filter-chip" onclick="filterRecurring(this,'weekly')">매주</div>
+            <div class="filter-chip" onclick="filterRecurring(this,'monthly')">매월</div>
+            <div class="filter-chip" onclick="filterRecurring(this,'yearly')">매년</div>
+          </div>
+          <div class="recurring-filters" id="recurringUserFilter"></div>
+          <div id="recurringList"></div>
+        </div>
+
+        <!-- ── 11. 팀 목표 ── -->
+        <div class="tab-content" id="tab-goals">
+          <div id="goalsContent"></div>
+        </div>
+
+
+
+
       </div>
     </div>
   </div>
@@ -862,6 +1051,25 @@
   <div class="notif-panel" id="notifPanel">
     <div class="notif-header">알림</div>
     <div id="notifList"></div>
+  </div>
+
+  <!-- AI 어시스턴트 플로팅 버튼 -->
+  <button class="chat-fab" id="chatFab" onclick="toggleChatPanel()" title="AI 어시스턴트">🤖</button>
+
+  <!-- AI 어시스턴트 플로팅 패널 -->
+  <div class="chat-float-panel" id="chatFloatPanel">
+    <div class="chat-float-header">
+      <span>🤖 AI 어시스턴트</span>
+      <div style="display:flex;gap:6px;">
+        <button class="chat-float-clear" onclick="clearChat()" title="대화 초기화">🗑️</button>
+        <button class="chat-float-close" onclick="toggleChatPanel()">✕</button>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-area">
+      <input class="chat-input" id="chatInput" placeholder="메시지 입력... (예: '내 업무 뭐 있어?')" onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="chat-send-btn" onclick="sendChat()">전송</button>
+    </div>
   </div>
 </div>
 
@@ -883,11 +1091,7 @@
     </div>
     <label>마감일</label><input type="date" id="addTaskDeadline">
     <label>담당 팀원</label>
-    <div class="assignee-chips" id="addTaskAssignees">
-      <div class="assignee-chip" onclick="toggleAssignee(this)">지원</div>
-      <div class="assignee-chip" onclick="toggleAssignee(this)">소영</div>
-      <div class="assignee-chip" onclick="toggleAssignee(this)">슬기</div>
-    </div>
+    <div class="assignee-chips" id="addTaskAssignees"></div>
     <label>메모</label><textarea id="addTaskMemo" placeholder="참고사항, 진행 내용 등을 적어주세요"></textarea>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal('addModal')">취소</button>
@@ -927,20 +1131,14 @@
     <label>회의 제목</label><input type="text" id="addMeetingTitle" placeholder="회의 제목을 입력하세요">
     <label>회의 날짜</label><input type="date" id="addMeetingDate" value="2026-03-18">
     <label>참석자</label>
-    <div class="assignee-chips" id="addMeetingAttendees">
-      <div class="assignee-chip selected" onclick="toggleAssignee(this)">지원</div>
-      <div class="assignee-chip selected" onclick="toggleAssignee(this)">소영</div>
-      <div class="assignee-chip selected" onclick="toggleAssignee(this)">슬기</div>
-    </div>
+    <div class="assignee-chips" id="addMeetingAttendees"></div>
     <label>안건</label><textarea id="addMeetingAgenda" placeholder="1. 첫 번째 안건&#10;2. 두 번째 안건"></textarea>
     <label>논의 내용</label><textarea id="addMeetingContent" style="min-height:120px;" placeholder="회의에서 논의된 내용을 정리하세요"></textarea>
     <label>팀원별 체크사항</label>
     <div id="meetingCheckItems">
       <div style="display:flex;gap:8px;margin-bottom:6px;">
         <input type="text" placeholder="체크사항 내용" style="flex:1;">
-        <select style="padding:8px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:13px;width:80px;">
-          <option>지원</option><option>소영</option><option>슬기</option><option>전체</option>
-        </select>
+        <select id="meetingCheckWho0" style="padding:8px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:13px;width:100px;"></select>
       </div>
     </div>
     <button onclick="addMeetingCheckItem()" style="background:none;border:1px dashed #ddd;padding:8px 16px;border-radius:8px;color:#999;cursor:pointer;font-size:13px;width:100%;margin-top:4px;">+ 체크사항 추가</button>
@@ -986,6 +1184,97 @@
   </div>
 </div>
 
+<!-- ════ 반복 업무 등록 모달 ════ -->
+<div class="modal-overlay" id="recurringAddModal">
+  <div class="modal">
+    <h3>🔄 반복 업무 등록</h3>
+    <label>업무 제목</label><input type="text" id="addRecurringTitle" placeholder="반복 업무 제목">
+    <label>반복 주기</label>
+    <div class="priority-selector" id="addRecurringCycle">
+      <div class="priority-option" onclick="selRecurringCycle(this,'weekly')">매주</div>
+      <div class="priority-option sel-normal" onclick="selRecurringCycle(this,'monthly')" style="border-color:#2563eb;background:#dbeafe;color:#2563eb;">매월</div>
+      <div class="priority-option" onclick="selRecurringCycle(this,'yearly')">매년</div>
+    </div>
+    <div id="recurringDayOfWeekField" style="display:none;">
+      <label>실행 요일</label>
+      <select id="addRecurringDayOfWeek">
+        <option value="1">월요일</option><option value="2">화요일</option><option value="3">수요일</option>
+        <option value="4">목요일</option><option value="5">금요일</option><option value="0">일요일</option><option value="6">토요일</option>
+      </select>
+    </div>
+    <div id="recurringDayField">
+      <label>실행일 (매월 몇 일)</label><input type="number" id="addRecurringDay" min="1" max="31" value="1" placeholder="1~31">
+    </div>
+    <div id="recurringMonthField" style="display:none;">
+      <label>실행 월 (매년)</label>
+      <select id="addRecurringMonth">
+        <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
+        <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
+        <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
+        <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+      </select>
+    </div>
+    <label>담당 팀원</label>
+    <div class="assignee-chips" id="addRecurringAssignees"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('recurringAddModal')">취소</button>
+      <button class="btn-submit" onclick="saveRecurring()">등록</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 목표 편집 모달 ════ -->
+<div class="modal-overlay" id="goalEditModal">
+  <div class="modal">
+    <h3 id="goalEditTitle">🎯 목표 수정</h3>
+    <label>목표</label><input type="text" id="editGoalTitle" placeholder="목표명">
+    <label>진행률 (%)</label><input type="number" id="editGoalProgress" min="0" max="100" value="0">
+    <label>메모</label><textarea id="editGoalNotes" placeholder="진행 상황 메모"></textarea>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('goalEditModal')">취소</button>
+      <button class="btn-submit" id="goalEditSaveBtn" onclick="saveGoalEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 월간 목표 추가 모달 ════ -->
+<div class="modal-overlay" id="goalAddModal">
+  <div class="modal">
+    <h3>🎯 월간 목표 추가</h3>
+    <label>목표</label><input type="text" id="addGoalTitle" placeholder="목표를 입력하세요">
+    <label>초기 진행률 (%)</label><input type="number" id="addGoalProgress" min="0" max="100" value="0">
+    <label>메모</label><textarea id="addGoalNotes" placeholder="목표 관련 메모"></textarea>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('goalAddModal')">취소</button>
+      <button class="btn-submit" onclick="saveNewGoal()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 프로필 설정 모달 ════ -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal" style="width:420px;">
+    <h3>👤 프로필 설정</h3>
+    <div style="text-align:center;margin-bottom:16px;">
+      <div class="profile-photo-preview" id="profilePhotoPreview"></div>
+      <div style="margin-top:10px;">
+        <label class="btn-submit" style="cursor:pointer;display:inline-block;">
+          📷 사진 선택
+          <input type="file" id="profilePhotoInput" accept="image/*" onchange="handlePhotoUpload(event)" style="display:none;">
+        </label>
+        <button class="btn-delete" onclick="removePhoto()" style="margin-left:8px;">사진 삭제</button>
+      </div>
+    </div>
+    <label>닉네임</label>
+    <input type="text" id="profileNickname" placeholder="닉네임을 입력하세요 (비워두면 본명 사용)">
+    <div style="font-size:12px;color:#999;margin-top:4px;">다른 팀원에게 이 닉네임으로 표시됩니다</div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('profileModal')">취소</button>
+      <button class="btn-submit" onclick="saveProfile()">저장</button>
+    </div>
+  </div>
+</div>
+
 <!-- 우클릭 메뉴 -->
 <div class="context-menu" id="contextMenu">
   <div class="ctx-item" onclick="ctxAction('progress')">🔄 진행중으로 변경</div>
@@ -1006,66 +1295,233 @@
 
 <script>
 // ═══════════════════════════════════════
+//  사용자 정보
+// ═══════════════════════════════════════
+const USERS = [
+  { id: 'soyoung', name: '임소영', dept: '쇼핑몰운영파트', color: '#ff8f00', initial: '소' },
+  { id: 'seulgi', name: '박슬기', dept: '쇼핑몰운영파트', color: '#795548', initial: '슬' },
+  { id: 'seona', name: '이선아', dept: '상담파트', color: '#e91e63', initial: '선' },
+  { id: 'miri', name: '이미리', dept: '상담파트', color: '#9c27b0', initial: '미' },
+  { id: 'mijeong', name: '김미정', dept: '상담파트', color: '#3f51b5', initial: '정' },
+  { id: 'eunju', name: '정은주', dept: '상담파트', color: '#00897b', initial: '은' },
+  { id: 'jiwon', name: '이지원', dept: '쇼핑몰운영파트', color: '#155940', initial: '지' },
+];
+
+function getUserById(id) { return USERS.find(u => u.id === id); }
+function getUserByName(name) { return USERS.find(u => u.name === name); }
+function getIdByName(name) { const u = getUserByName(name); return u ? u.id : 'jiwon'; }
+function getColorByName(name) { const u = getUserByName(name); return u ? u.color : '#155940'; }
+
+// ═══════════════════════════════════════
+//  프로필 (닉네임/사진) - localStorage
+// ═══════════════════════════════════════
+function loadProfiles() {
+  const saved = localStorage.getItem('teamAppProfiles');
+  if (saved) try { return JSON.parse(saved); } catch(e) {}
+  return {};
+}
+function saveProfiles() { localStorage.setItem('teamAppProfiles', JSON.stringify(userProfiles)); }
+let userProfiles = loadProfiles();
+
+function getDisplayName(userId) {
+  const profile = userProfiles[userId];
+  const user = USERS.find(u => u.id === userId);
+  if (profile && profile.nickname) return profile.nickname;
+  return user ? user.name : userId;
+}
+
+function getUserShortName(userId) {
+  const profile = userProfiles[userId];
+  const user = USERS.find(u => u.id === userId);
+  if (profile && profile.nickname) return profile.nickname.slice(0, 2);
+  return user ? user.initial : '?';
+}
+
+function getUserPhoto(userId) {
+  const profile = userProfiles[userId];
+  return profile ? profile.photo : null;
+}
+
+function renderAvatarHtml(userId, sizeClass) {
+  const user = USERS.find(u => u.id === userId);
+  const photo = getUserPhoto(userId);
+  if (photo) {
+    if (sizeClass === 'avatar-xs') return `<img src="${photo}" class="avatar-photo-xs">`;
+    if (sizeClass === 'avatar-sm') return `<img src="${photo}" class="avatar-photo-sm">`;
+    return `<img src="${photo}" class="avatar-photo" style="width:80px;height:80px;">`;
+  }
+  const initial = user ? user.initial : '?';
+  const avClass = user ? 'av-' + user.id : '';
+  if (sizeClass === 'avatar-xs') return `<span class="avatar-xs ${avClass}">${initial}</span>`;
+  if (sizeClass === 'avatar-sm') return `<span class="avatar-sm ${avClass}">${initial}</span>`;
+  return `<div class="avatar ${avClass}">${initial}</div>`;
+}
+
+function openProfileModal() {
+  if (!currentUser) return;
+  const profile = userProfiles[currentUser.id] || {};
+  document.getElementById('profileNickname').value = profile.nickname || '';
+  const photo = profile.photo;
+  const user = USERS.find(u => u.id === currentUser.id);
+  const preview = document.getElementById('profilePhotoPreview');
+  if (photo) {
+    preview.innerHTML = `<img src="${photo}" class="avatar-photo" style="width:100px;height:100px;">`;
+    preview.className = 'profile-photo-preview';
+  } else {
+    preview.className = 'profile-photo-preview av-' + currentUser.id;
+    preview.innerHTML = user ? user.initial : '?';
+  }
+  openModal('profileModal');
+}
+
+function handlePhotoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const size = 200;
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const min = Math.min(img.width, img.height);
+      const sx = (img.width - min) / 2;
+      const sy = (img.height - min) / 2;
+      ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      document.getElementById('profilePhotoPreview').innerHTML =
+        `<img src="${dataUrl}" class="avatar-photo" style="width:100px;height:100px;">`;
+      document.getElementById('profilePhotoPreview').className = 'profile-photo-preview';
+      document.getElementById('profilePhotoInput').dataset.tempPhoto = dataUrl;
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePhoto() {
+  if (!currentUser) return;
+  const user = USERS.find(u => u.id === currentUser.id);
+  const preview = document.getElementById('profilePhotoPreview');
+  preview.className = 'profile-photo-preview av-' + currentUser.id;
+  preview.innerHTML = user ? user.initial : '?';
+  document.getElementById('profilePhotoInput').dataset.tempPhoto = '';
+  if (userProfiles[currentUser.id]) {
+    delete userProfiles[currentUser.id].photo;
+    saveProfiles();
+  }
+}
+
+function saveProfile() {
+  if (!currentUser) return;
+  if (!userProfiles[currentUser.id]) userProfiles[currentUser.id] = {};
+  const nickname = document.getElementById('profileNickname').value.trim();
+  userProfiles[currentUser.id].nickname = nickname;
+  const tempPhoto = document.getElementById('profilePhotoInput').dataset.tempPhoto;
+  if (tempPhoto) {
+    userProfiles[currentUser.id].photo = tempPhoto;
+    document.getElementById('profilePhotoInput').dataset.tempPhoto = '';
+  }
+  saveProfiles();
+  updateHeaderProfile();
+  updateLoginPhotos();
+  renderAll();
+  closeModal('profileModal');
+}
+
+function updateHeaderProfile() {
+  if (!currentUser) return;
+  const displayName = getDisplayName(currentUser.id);
+  document.getElementById('headerName').textContent = displayName;
+  document.getElementById('dashName').textContent = displayName;
+  const photo = getUserPhoto(currentUser.id);
+  const avatarEl = document.getElementById('headerAvatar');
+  if (photo) {
+    avatarEl.innerHTML = `<img src="${photo}" class="avatar-photo-sm">`;
+    avatarEl.style.overflow = 'hidden';
+  } else {
+    avatarEl.innerHTML = '';
+    avatarEl.textContent = getUserShortName(currentUser.id);
+    avatarEl.className = 'avatar-sm av-' + currentUser.id;
+  }
+}
+
+function updateLoginPhotos() {
+  USERS.forEach(u => {
+    const el = document.getElementById('loginPhoto-' + u.id);
+    if (!el) return;
+    const photo = getUserPhoto(u.id);
+    if (photo) {
+      el.innerHTML = `<img src="${photo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`;
+    } else {
+      el.innerHTML = `<div class="avatar av-${u.id}">${u.initial}</div>`;
+    }
+  });
+}
+
+// ═══════════════════════════════════════
 //  데이터 스토어 (localStorage)
 // ═══════════════════════════════════════
 
 const DEFAULT_DATA = {
   tasks: [
-    { id: 1, title: '클라이언트 제안서 수정', priority: 'urgent', status: '진행중', deadline: '2026-03-16', assignees: ['지원','소영'], memos: [{date:'3/14',text:'1차 초안 작성 완료'},{date:'3/15',text:'김 대리 피드백: 예산 부분 수정 필요'},{date:'3/16',text:'디자인은 소영이가 맡기로 함'},{date:'3/17',text:'최종본 PDF 변환 후 메일 발송 예정'}] },
-    { id: 2, title: '3월 예산안 최종 확인', priority: 'urgent', status: '시작전', deadline: '2026-03-19', assignees: ['지원'], memos: [] },
-    { id: 3, title: '회의실 예약 시스템 리서치', priority: 'normal', status: '진행중', deadline: '2026-03-21', assignees: ['지원','슬기'], memos: [] },
-    { id: 4, title: '주간 보고서 양식 정리', priority: 'normal', status: '시작전', deadline: '2026-03-25', assignees: ['지원'], memos: [] },
-    { id: 5, title: '팀 워크숍 장소 알아보기', priority: 'normal', status: '완료', deadline: '', assignees: ['소영','슬기'], memos: [] },
-    { id: 6, title: 'SNS 콘텐츠 3월분 제작', priority: 'urgent', status: '진행중', deadline: '2026-03-20', assignees: ['소영'], memos: [] },
-    { id: 7, title: '클라이언트 제안서 디자인', priority: 'normal', status: '진행중', deadline: '', assignees: ['소영'], memos: [] },
-    { id: 8, title: '서버 모니터링 설정', priority: 'normal', status: '시작전', deadline: '2026-03-22', assignees: ['슬기'], memos: [] },
-    { id: 9, title: '2월 실적 보고서 작성', priority: 'normal', status: '완료', deadline: '2026-03-15', assignees: ['지원'], memos: [] },
-    { id: 10, title: '신규 프로젝트 킥오프 미팅', priority: 'normal', status: '완료', deadline: '2026-03-14', assignees: ['지원','소영','슬기'], memos: [] },
-    { id: 11, title: '거래처 계약서 검토', priority: 'normal', status: '완료', deadline: '2026-03-12', assignees: ['지원'], memos: [] },
-    { id: 12, title: 'SNS 2월 결산 리포트', priority: 'normal', status: '완료', deadline: '2026-03-11', assignees: ['소영'], memos: [] },
-    { id: 13, title: '팀 회식 장소 예약', priority: 'normal', status: '완료', deadline: '2026-03-10', assignees: ['슬기'], memos: [] },
-    { id: 14, title: '1분기 KPI 중간점검', priority: 'normal', status: '완료', deadline: '2026-03-07', assignees: ['지원','소영','슬기'], memos: [] },
+    { id: 1, title: '클라이언트 제안서 수정', priority: 'urgent', status: '진행중', deadline: '2026-03-16', assignees: ['이지원','임소영'], memos: [{date:'3/14',text:'1차 초안 작성 완료'},{date:'3/15',text:'김 대리 피드백: 예산 부분 수정 필요'},{date:'3/16',text:'디자인은 임소영이 맡기로 함'},{date:'3/17',text:'최종본 PDF 변환 후 메일 발송 예정'}] },
+    { id: 2, title: '3월 예산안 최종 확인', priority: 'urgent', status: '시작전', deadline: '2026-03-19', assignees: ['이지원'], memos: [] },
+    { id: 3, title: '회의실 예약 시스템 리서치', priority: 'normal', status: '진행중', deadline: '2026-03-21', assignees: ['이지원','박슬기'], memos: [] },
+    { id: 4, title: '주간 보고서 양식 정리', priority: 'normal', status: '시작전', deadline: '2026-03-25', assignees: ['이지원'], memos: [] },
+    { id: 5, title: '팀 워크숍 장소 알아보기', priority: 'normal', status: '완료', deadline: '', assignees: ['임소영','박슬기'], memos: [] },
+    { id: 6, title: 'SNS 콘텐츠 3월분 제작', priority: 'urgent', status: '진행중', deadline: '2026-03-20', assignees: ['임소영'], memos: [] },
+    { id: 7, title: '클라이언트 제안서 디자인', priority: 'normal', status: '진행중', deadline: '', assignees: ['임소영'], memos: [] },
+    { id: 8, title: '서버 모니터링 설정', priority: 'normal', status: '시작전', deadline: '2026-03-22', assignees: ['박슬기'], memos: [] },
+    { id: 9, title: '2월 실적 보고서 작성', priority: 'normal', status: '완료', deadline: '2026-03-15', assignees: ['이지원'], memos: [] },
+    { id: 10, title: '신규 프로젝트 킥오프 미팅', priority: 'normal', status: '완료', deadline: '2026-03-14', assignees: ['이지원','임소영','박슬기'], memos: [] },
+    { id: 11, title: '거래처 계약서 검토', priority: 'normal', status: '완료', deadline: '2026-03-12', assignees: ['이지원'], memos: [] },
+    { id: 12, title: 'SNS 2월 결산 리포트', priority: 'normal', status: '완료', deadline: '2026-03-11', assignees: ['임소영'], memos: [] },
+    { id: 13, title: '팀 회식 장소 예약', priority: 'normal', status: '완료', deadline: '2026-03-10', assignees: ['박슬기'], memos: [] },
+    { id: 14, title: '1분기 KPI 중간점검', priority: 'normal', status: '완료', deadline: '2026-03-07', assignees: ['이지원','임소영','박슬기'], memos: [] },
   ],
   meetings: [
-    { id: 1, title: '주간 정기회의 - 3월 3주차', date: '2026-03-18', attendees: ['지원','소영','슬기'],
+    { id: 1, title: '주간 정기회의 - 3월 3주차', date: '2026-03-18', attendees: ['이지원','임소영','박슬기'],
       agenda: '1. 타임세일 진행 상황 공유\n2. 클라이언트 제안서 마감 일정 논의\n3. 4월 프로모션 기획 아이디어 브레인스토밍\n4. 사은품 이벤트 중간 현황',
-      content: '- 타임세일 POP 설치 완료, SNS 포스팅은 오늘 중 올리기로\n- 제안서 디자인 소영이 작업 중, 내일까지 1차 완성 예정\n- 4월 프로모션은 "봄맞이 코디 제안" 컨셉으로 진행\n- 사은품 파우치 현재 70% 소진',
-      checks: [{text:'매장 POP 최종 점검',who:'슬기',done:true},{text:'SNS 홍보 포스팅 업로드',who:'소영',done:false},{text:'제안서 예산 파트 수정',who:'지원',done:true},{text:'4월 프로모션 기획안 초안 작성',who:'소영',done:false},{text:'사은품 추가 발주 검토',who:'지원',done:false}]
+      content: '- 타임세일 POP 설치 완료, SNS 포스팅은 오늘 중 올리기로\n- 제안서 디자인 임소영 작업 중, 내일까지 1차 완성 예정\n- 4월 프로모션은 "봄맞이 코디 제안" 컨셉으로 진행\n- 사은품 파우치 현재 70% 소진',
+      checks: [{text:'매장 POP 최종 점검',who:'박슬기',done:true},{text:'SNS 홍보 포스팅 업로드',who:'임소영',done:false},{text:'제안서 예산 파트 수정',who:'이지원',done:true},{text:'4월 프로모션 기획안 초안 작성',who:'임소영',done:false},{text:'사은품 추가 발주 검토',who:'이지원',done:false}]
     },
-    { id: 2, title: '킥오프 미팅 - 신규 프로젝트', date: '2026-03-14', attendees: ['지원','소영','슬기'],
+    { id: 2, title: '킥오프 미팅 - 신규 프로젝트', date: '2026-03-14', attendees: ['이지원','임소영','박슬기'],
       agenda: '1. 프로젝트 목표 설정\n2. 역할 분담\n3. 전체 일정 수립\n4. 첫 마일스톤 결정',
-      content: '- 팀 업무 관리 웹 프로그램 직접 개발하기로 결정\n- 지원: 프로젝트 리더 + 백엔드, 소영: 프론트엔드 + 디자인, 슬기: 인프라 + 테스트\n- 3월 내 프로토타입 완성 목표\n- 첫 마일스톤: 3/21 요구사항 정리 완료',
-      checks: [{text:'요구사항 문서 각자 작성',who:'전체',done:true},{text:'기술 스택 조사',who:'슬기',done:true},{text:'UI 레퍼런스 수집',who:'소영',done:true},{text:'DB 구조 초안 설계',who:'지원',done:false}]
+      content: '- 팀 업무 관리 웹 프로그램 직접 개발하기로 결정\n- 이지원: 프로젝트 리더 + 백엔드, 임소영: 프론트엔드 + 디자인, 박슬기: 인프라 + 테스트\n- 3월 내 프로토타입 완성 목표\n- 첫 마일스톤: 3/21 요구사항 정리 완료',
+      checks: [{text:'요구사항 문서 각자 작성',who:'전체',done:true},{text:'기술 스택 조사',who:'박슬기',done:true},{text:'UI 레퍼런스 수집',who:'임소영',done:true},{text:'DB 구조 초안 설계',who:'이지원',done:false}]
     },
-    { id: 3, title: '1분기 KPI 중간점검 회의', date: '2026-03-07', attendees: ['지원','소영','슬기'],
+    { id: 3, title: '1분기 KPI 중간점검 회의', date: '2026-03-07', attendees: ['이지원','임소영','박슬기'],
       agenda: '1. 팀별 KPI 달성률 확인\n2. 하반기 목표 조정 논의',
       content: '- 1분기 매출 목표 대비 92% 달성 중\n- SNS 팔로워 증가율 목표 초과 달성\n- 고객 만족도 설문 결과 4.2/5.0\n- 2분기에는 온라인 채널 강화에 집중하기로',
-      checks: [{text:'1분기 실적 보고서 최종 정리',who:'지원',done:true},{text:'SNS 분석 리포트 작성',who:'소영',done:true},{text:'서버 성능 리포트 정리',who:'슬기',done:true},{text:'2분기 KPI 목표 초안',who:'지원',done:true}]
+      checks: [{text:'1분기 실적 보고서 최종 정리',who:'이지원',done:true},{text:'SNS 분석 리포트 작성',who:'임소영',done:true},{text:'서버 성능 리포트 정리',who:'박슬기',done:true},{text:'2분기 KPI 목표 초안',who:'이지원',done:true}]
     },
   ],
   notices: [
-    { id: 1, title: '🔥 이번주 타임세일: 봄시즌 신상품 30% OFF', type: '타임세일', date: '2026-03-18', author: '지원',
-      content: '📅 기간: 3/18(화) ~ 3/22(일)\n\n📦 대상: 봄시즌 신상품 전품목\n\n💰 할인율: 30% OFF\n\n📋 할 일:\n- 매장 POP 설치 (슬기)\n- SNS 홍보 포스팅 (소영)\n- 매장 재고 확인 (지원)\n\n⚠️ 주의사항:\n- 기존 세일 품목과 중복 할인 불가\n- 멤버십 추가 할인은 적용 가능\n- 재고 소진 시 개별 품목 종료 가능',
-      readBy: ['지원']
+    { id: 1, title: '🔥 이번주 타임세일: 봄시즌 신상품 30% OFF', type: '타임세일', date: '2026-03-18', author: '이지원',
+      content: '📅 기간: 3/18(화) ~ 3/22(일)\n\n📦 대상: 봄시즌 신상품 전품목\n\n💰 할인율: 30% OFF\n\n📋 할 일:\n- 매장 POP 설치 (박슬기)\n- SNS 홍보 포스팅 (임소영)\n- 매장 재고 확인 (이지원)\n\n⚠️ 주의사항:\n- 기존 세일 품목과 중복 할인 불가\n- 멤버십 추가 할인은 적용 가능\n- 재고 소진 시 개별 품목 종료 가능',
+      readBy: ['이지원']
     },
-    { id: 2, title: '🎁 3월 사은품 증정 이벤트 안내', type: '증정이벤트', date: '2026-03-17', author: '소영',
-      content: '🎁 이벤트: 5만원 이상 구매 시 미니 파우치 증정\n\n📅 기간: 3/17(월) ~ 3/31(월) 또는 재고 소진시\n\n📦 사은품 수량:\n- 각 매장 50개 배정\n- 추가 수량 필요 시 지원에게 요청\n\n📋 진행 방법:\n1. 결제 완료 후 영수증 확인\n2. 5만원 이상이면 사은품 전달\n3. 사은품 대장에 기록 (수량 관리)\n\n⚠️ 주의:\n- 교환/환불 시 사은품 회수\n- 온라인 구매 건은 해당 없음',
-      readBy: ['소영','슬기']
+    { id: 2, title: '🎁 3월 사은품 증정 이벤트 안내', type: '증정이벤트', date: '2026-03-17', author: '임소영',
+      content: '🎁 이벤트: 5만원 이상 구매 시 미니 파우치 증정\n\n📅 기간: 3/17(월) ~ 3/31(월) 또는 재고 소진시\n\n📦 사은품 수량:\n- 각 매장 50개 배정\n- 추가 수량 필요 시 이지원에게 요청\n\n📋 진행 방법:\n1. 결제 완료 후 영수증 확인\n2. 5만원 이상이면 사은품 전달\n3. 사은품 대장에 기록 (수량 관리)\n\n⚠️ 주의:\n- 교환/환불 시 사은품 회수\n- 온라인 구매 건은 해당 없음',
+      readBy: ['임소영','박슬기']
     },
-    { id: 3, title: '지난주 타임세일 결과 공유', type: '타임세일', date: '2026-03-10', author: '지원',
+    { id: 3, title: '지난주 타임세일 결과 공유', type: '타임세일', date: '2026-03-10', author: '이지원',
       content: '3/10~3/14 타임세일 매출 요약: 전주 대비 23% 상승.\n인기 품목: 스프링코트, 니트가디건',
-      readBy: ['지원','소영','슬기']
+      readBy: ['이지원','임소영','박슬기']
     },
-    { id: 4, title: '3월 근무 일정 안내', type: '공지', date: '2026-03-05', author: '지원',
+    { id: 4, title: '3월 근무 일정 안내', type: '공지', date: '2026-03-05', author: '이지원',
       content: '3월 공휴일 및 대체 근무일 안내입니다.\n달력 확인해주세요.',
-      readBy: ['지원','소영','슬기']
+      readBy: ['이지원','임소영','박슬기']
     },
   ],
   memos: [
-    { id: 1, title: '타임세일 체크리스트', content: 'POP 설치 확인, 할인 태그 부착, SNS 홍보 포스팅 예약, 재고 수량 체크', date: '2026-03-18', owner: '지원' },
-    { id: 2, title: '거래처 미팅 메모', content: '담당자: 김과장, 납품 단가 5% 인하 요청, 다음 미팅 4월 첫째주 예정', date: '2026-03-17', owner: '지원' },
-    { id: 3, title: '신상품 아이디어', content: '여름 시즌 준비: 린넨 소재 의류, 쿨링 액세서리, 비치웨어 라인 검토', date: '2026-03-15', owner: '지원' },
-    { id: 4, title: '팀 회식 후기', content: '장소: 강남 이탈리안 레스토랑, 분위기 좋았음. 다음엔 한식으로 하자는 의견', date: '2026-03-10', owner: '지원' },
+    { id: 1, title: '타임세일 체크리스트', content: 'POP 설치 확인, 할인 태그 부착, SNS 홍보 포스팅 예약, 재고 수량 체크', date: '2026-03-18', owner: '이지원' },
+    { id: 2, title: '거래처 미팅 메모', content: '담당자: 김과장, 납품 단가 5% 인하 요청, 다음 미팅 4월 첫째주 예정', date: '2026-03-17', owner: '이지원' },
+    { id: 3, title: '신상품 아이디어', content: '여름 시즌 준비: 린넨 소재 의류, 쿨링 액세서리, 비치웨어 라인 검토', date: '2026-03-15', owner: '이지원' },
+    { id: 4, title: '팀 회식 후기', content: '장소: 강남 이탈리안 레스토랑, 분위기 좋았음. 다음엔 한식으로 하자는 의견', date: '2026-03-10', owner: '이지원' },
   ],
   fixedTasks: [
     { day: 1, title: '주간보고 작성' },
@@ -1073,33 +1529,64 @@ const DEFAULT_DATA = {
     { day: 5, title: '주간 정산' },
   ],
   calendarEvents: [
-    { date: '2026-03-16', title: '제안서 수정 마감', cat: 'task', who: '지원, 소영' },
-    { date: '2026-03-17', title: '거래처 미팅', cat: 'meeting', who: '지원' },
+    { date: '2026-03-16', title: '제안서 수정 마감', cat: 'task', who: '이지원, 임소영' },
+    { date: '2026-03-17', title: '거래처 미팅', cat: 'meeting', who: '이지원' },
     { date: '2026-03-18', title: '팀 주간회의', cat: 'meeting', who: '전체' },
     { date: '2026-03-18', title: '타임세일 시작', cat: 'event', who: '전체' },
-    { date: '2026-03-18', title: '제안서 수정', cat: 'task', who: '지원, 소영' },
-    { date: '2026-03-19', title: '예산안 최종 확인', cat: 'task', who: '지원' },
-    { date: '2026-03-20', title: 'SNS 콘텐츠 제작', cat: 'task', who: '소영' },
-    { date: '2026-03-21', title: '회의실 리서치', cat: 'task', who: '지원, 슬기' },
-    { date: '2026-03-21', title: '슬기 연차', cat: 'leave', who: '슬기' },
-    { date: '2026-03-22', title: '서버 모니터링', cat: 'task', who: '슬기' },
+    { date: '2026-03-18', title: '제안서 수정', cat: 'task', who: '이지원, 임소영' },
+    { date: '2026-03-19', title: '예산안 최종 확인', cat: 'task', who: '이지원' },
+    { date: '2026-03-20', title: 'SNS 콘텐츠 제작', cat: 'task', who: '임소영' },
+    { date: '2026-03-21', title: '회의실 리서치', cat: 'task', who: '이지원, 박슬기' },
+    { date: '2026-03-21', title: '박슬기 연차', cat: 'leave', who: '박슬기' },
+    { date: '2026-03-22', title: '서버 모니터링', cat: 'task', who: '박슬기' },
     { date: '2026-03-24', title: '월간 정기회의', cat: 'meeting', who: '전체' },
-    { date: '2026-03-25', title: '보고서 양식 정리', cat: 'task', who: '지원' },
-    { date: '2026-03-27', title: '소영 연차', cat: 'leave', who: '소영' },
+    { date: '2026-03-25', title: '보고서 양식 정리', cat: 'task', who: '이지원' },
+    { date: '2026-03-27', title: '임소영 연차', cat: 'leave', who: '임소영' },
     { date: '2026-03-31', title: '사은품 증정 종료', cat: 'event', who: '전체' },
     { date: '2026-03-07', title: 'KPI 중간점검', cat: 'done', who: '전체' },
-    { date: '2026-03-10', title: '회식 장소 예약', cat: 'done', who: '슬기' },
-    { date: '2026-03-12', title: '계약서 검토', cat: 'done', who: '지원' },
+    { date: '2026-03-10', title: '회식 장소 예약', cat: 'done', who: '박슬기' },
+    { date: '2026-03-12', title: '계약서 검토', cat: 'done', who: '이지원' },
     { date: '2026-03-14', title: '킥오프 미팅', cat: 'done', who: '전체' },
-    { date: '2026-03-15', title: '실적 보고서', cat: 'done', who: '지원' },
-    { date: '2026-03-11', title: 'SNS 결산 리포트', cat: 'done', who: '소영' },
+    { date: '2026-03-15', title: '실적 보고서', cat: 'done', who: '이지원' },
+    { date: '2026-03-11', title: 'SNS 결산 리포트', cat: 'done', who: '임소영' },
   ],
+  recurringTasks: [
+    { id: 1, title: '세금계산서 발행', cycle: 'monthly', day: 5, assignees: ['이지원'], history: {'2026-01': true, '2026-02': true, '2026-03': false} },
+    { id: 2, title: '재고 실사', cycle: 'monthly', day: 15, assignees: ['박슬기'], history: {'2026-01': true, '2026-02': true, '2026-03': false} },
+    { id: 3, title: '월간 매출 보고서 작성', cycle: 'monthly', day: 25, assignees: ['이지원','임소영'], history: {'2026-01': true, '2026-02': true, '2026-03': false} },
+    { id: 4, title: '분기별 KPI 리뷰', cycle: 'yearly', month: 3, day: 31, assignees: ['이지원','임소영','박슬기'], history: {'2026-03': false} },
+    { id: 5, title: '연간 사업계획 수립', cycle: 'yearly', month: 1, day: 15, assignees: ['이지원'], history: {'2026-01': true} },
+    { id: 6, title: '주간보고 작성', cycle: 'weekly', dayOfWeek: 1, assignees: ['이지원'], history: {'2026-W10': true, '2026-W11': true, '2026-W12': false} },
+    { id: 7, title: '팀 미팅 준비', cycle: 'weekly', dayOfWeek: 3, assignees: ['이지원','임소영','박슬기'], history: {'2026-W10': true, '2026-W11': true, '2026-W12': false} },
+    { id: 8, title: '주간 정산', cycle: 'weekly', dayOfWeek: 5, assignees: ['박슬기'], history: {'2026-W10': true, '2026-W11': true, '2026-W12': false} },
+  ],
+  teamGoals: {
+    yearly: [
+      { id: 1, title: '연매출 12억 달성', progress: 25, notes: '1분기 목표 대비 92% 달성 중' },
+      { id: 2, title: '온라인 채널 매출 비중 30% 달성', progress: 18, notes: 'SNS 팔로워 증가율 목표 초과' },
+      { id: 3, title: '고객 만족도 4.5 이상 유지', progress: 40, notes: '현재 4.2/5.0' },
+    ],
+    monthly: {
+      '2026-03': [
+        { id: 1, title: '봄시즌 타임세일 매출 목표 2000만원', progress: 60, notes: '현재 1200만원 달성' },
+        { id: 2, title: '신규 고객 50명 유치', progress: 70, notes: '현재 35명 유치 완료' },
+        { id: 3, title: '팀 업무관리 시스템 프로토타입 완성', progress: 80, notes: '프로토타입 개발 중' },
+      ]
+    }
+  },
+  chatHistory: [],
 };
 
 function loadData() {
   const saved = localStorage.getItem('teamAppData');
   if (saved) {
-    try { return JSON.parse(saved); } catch(e) {}
+    try {
+      const parsed = JSON.parse(saved);
+      if (!parsed.recurringTasks) parsed.recurringTasks = JSON.parse(JSON.stringify(DEFAULT_DATA.recurringTasks));
+      if (!parsed.teamGoals) parsed.teamGoals = JSON.parse(JSON.stringify(DEFAULT_DATA.teamGoals));
+      if (!parsed.chatHistory) parsed.chatHistory = [];
+      return parsed;
+    } catch(e) {}
   }
   return JSON.parse(JSON.stringify(DEFAULT_DATA));
 }
@@ -1114,6 +1601,73 @@ let ctxTargetTaskId = null;
 let currentTab = 'dashboard';
 
 // ═══════════════════════════════════════
+//  동적 UI 빌더 (칩/필터 등)
+// ═══════════════════════════════════════
+function buildAssigneeChips(containerId, preselected) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = USERS.map(u => {
+    const sel = preselected && preselected.includes(u.name) ? ' selected' : '';
+    return `<div class="assignee-chip${sel}" onclick="toggleAssignee(this)">${u.name}</div>`;
+  }).join('');
+}
+
+function buildMeetingWhoSelect(selectEl) {
+  if (!selectEl) return;
+  selectEl.innerHTML = USERS.map(u => `<option>${u.name}</option>`).join('') + '<option>전체</option>';
+}
+
+function buildKanbanToolbar() {
+  const el = document.getElementById('kanbanToolbar');
+  let html = '<div class="filter-chip active" data-group="assignee" onclick="toggleKanbanFilter(this,\'all\')">전체</div>';
+  USERS.forEach(u => {
+    html += `<div class="filter-chip" data-group="assignee" onclick="toggleKanbanFilter(this,'${u.name}')">${u.name}</div>`;
+  });
+  html += '<div style="margin-left:auto;display:flex;gap:8px;">';
+  html += '<div class="filter-chip active" data-group="priority" onclick="toggleKanbanPriority(this,\'all\')">전체</div>';
+  html += '<div class="filter-chip" data-group="priority" onclick="toggleKanbanPriority(this,\'urgent\')">🔴 긴급</div>';
+  html += '<div class="filter-chip" data-group="priority" onclick="toggleKanbanPriority(this,\'normal\')">🔵 일보따리</div>';
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function buildTeamToolbar() {
+  const el = document.getElementById('teamToolbar');
+  let html = '<div class="team-chip tc-all active" onclick="filterTeam(this,\'all\')">전체</div>';
+  USERS.forEach(u => {
+    html += `<div class="team-chip tc-${u.id}" onclick="filterTeam(this,'${u.name}')">${u.name}</div>`;
+  });
+  html += '<div class="view-toggle"><button class="view-btn active" onclick="switchTeamView(\'table\',this)">테이블</button><button class="view-btn" onclick="switchTeamView(\'card\',this)">카드</button></div>';
+  el.innerHTML = html;
+}
+
+function buildCalFilters() {
+  const el = document.getElementById('calFilters');
+  let html = '<span class="cal-filter-label">종류</span>';
+  html += '<div class="cal-filter-chip cf-task active" onclick="toggleCalFilter(this)">🔴 업무</div>';
+  html += '<div class="cal-filter-chip cf-meeting active" onclick="toggleCalFilter(this)">🟡 회의</div>';
+  html += '<div class="cal-filter-chip cf-leave active" onclick="toggleCalFilter(this)">🟢 연차</div>';
+  html += '<div class="cal-filter-chip cf-event active" onclick="toggleCalFilter(this)">🟣 이벤트</div>';
+  html += '<div class="cal-filter-divider"></div>';
+  html += '<span class="cal-filter-label">팀원</span>';
+  html += '<div class="cal-filter-chip active" onclick="toggleCalFilter(this)" style="border-color:#155940;background:#d4edda;color:#155940;">전체</div>';
+  USERS.forEach(u => {
+    html += `<div class="cal-filter-chip" onclick="toggleCalFilter(this)">${u.name}</div>`;
+  });
+  el.innerHTML = html;
+}
+
+function buildRecurringUserFilter() {
+  const el = document.getElementById('recurringUserFilter');
+  let html = '<span style="font-size:12px;color:#999;font-weight:600;margin-right:4px;">담당자</span>';
+  html += '<div class="filter-chip active" onclick="filterRecurringUser(this,\'all\')">전체</div>';
+  USERS.forEach(u => {
+    html += `<div class="filter-chip" onclick="filterRecurringUser(this,'${u.name}')">${u.name}</div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════
 //  로그인/로그아웃
 // ═══════════════════════════════════════
 function login(name, id) {
@@ -1121,10 +1675,8 @@ function login(name, id) {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   document.getElementById('app').style.flexDirection = 'column';
-  document.getElementById('headerName').textContent = name;
-  document.getElementById('dashName').textContent = name;
-  const av = document.getElementById('headerAvatar');
-  av.textContent = name[0]; av.className = 'avatar-sm av-' + id;
+  document.getElementById('chatFab').style.display = 'flex';
+  updateHeaderProfile();
   renderAll();
 }
 
@@ -1132,13 +1684,18 @@ function logout() {
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
   document.getElementById('notifPanel').classList.remove('show');
+  document.getElementById('chatFloatPanel').classList.remove('show');
+  document.getElementById('chatFab').style.display = 'none';
+  document.getElementById('chatFab').classList.remove('active');
+  document.getElementById('chatFab').textContent = '🤖';
   currentUser = null;
+  chatInitialized = false;
 }
 
 // ═══════════════════════════════════════
 //  네비게이션
 // ═══════════════════════════════════════
-const tabNames = ['dashboard','todo','kanban','calendar','team','meeting','notice','monthly','memo'];
+const tabNames = ['dashboard','todo','kanban','calendar','team','meeting','notice','monthly','memo','recurring','goals'];
 
 function navTo(name, el) {
   document.querySelectorAll('.sidebar .nav-item').forEach(n => n.classList.remove('active'));
@@ -1168,6 +1725,8 @@ function renderAll() {
   renderMemos();
   renderNotifications();
   renderPW();
+  renderRecurring();
+  renderGoals();
 }
 
 // ── 대시보드 ──
@@ -1194,22 +1753,19 @@ function renderDashboard() {
   }).join('');
 
   // 팀원 현황
-  const members = ['지원','소영','슬기'];
-  const colors = {지원:'#667eea',소영:'#f093fb',슬기:'#4facfe'};
-  const ids = {지원:'jiwon',소영:'soyoung',슬기:'seulgi'};
-  document.getElementById('teamStatusList').innerHTML = members.map(m => {
-    const total = tasks.filter(t => t.assignees.includes(m)).length;
-    const completed = tasks.filter(t => t.assignees.includes(m) && t.status === '완료').length;
+  document.getElementById('teamStatusList').innerHTML = USERS.map(u => {
+    const total = tasks.filter(t => t.assignees.includes(u.name)).length;
+    const completed = tasks.filter(t => t.assignees.includes(u.name) && t.status === '완료').length;
     const pct = total ? Math.round(completed/total*100) : 0;
-    return `<div class="team-member-row"><div class="avatar-xs av-${ids[m]}">${m[0]}</div><span class="tm-name">${m}</span><div class="tm-bar"><div class="tm-bar-fill" style="width:${pct}%;background:${colors[m]};"></div></div><span class="tm-count">${completed}/${total}</span></div>`;
+    return `<div class="team-member-row"><div class="avatar-xs av-${u.id}">${u.initial}</div><span class="tm-name">${u.name}</span><div class="tm-bar"><div class="tm-bar-fill" style="width:${pct}%;background:${u.color};"></div></div><span class="tm-count">${completed}/${total}</span></div>`;
   }).join('');
 
   // 최근 활동
   const activities = [
     { text: '🔴 제안서 수정 마감일이 지났습니다!', time: '1시간 전' },
-    { text: '📋 소영님이 SNS 검토를 요청했습니다', time: '3시간 전' },
+    { text: '📋 임소영님이 SNS 검토를 요청했습니다', time: '3시간 전' },
     { text: '⏰ 예산안 확인 마감이 내일입니다', time: '오전 9시' },
-    { text: '✅ 슬기님이 모니터링 설정을 완료', time: '어제' },
+    { text: '✅ 박슬기님이 모니터링 설정을 완료', time: '어제' },
     { text: '📝 주간 정기회의 회의록 등록', time: '어제' },
   ];
   document.getElementById('recentActivity').innerHTML = activities.map(a =>
@@ -1265,13 +1821,17 @@ function selectTask(id) {
   const dlStyle = t.deadline && t.deadline < today ? 'color:#dc2626;font-weight:600;' : 'color:#d97706;';
   const dlText = t.deadline ? (t.deadline < today ? `📅 ${t.deadline} (마감 지남!)` : `📅 ${t.deadline}`) : '없음';
   const priorityBadge = t.priority === 'urgent' ? '<span class="cat-badge badge-urgent">긴급</span>' : '<span class="cat-badge badge-normal">일보따리</span>';
-  const ids = {지원:'jiwon',소영:'soyoung',슬기:'seulgi'};
 
   let memoHtml = t.memos.length ?
     t.memos.map(m => `<div class="memo-entry"><span class="memo-date">${m.date}</span>${escapeHtml(m.text)}</div>`).join('') :
     '<div style="color:#ccc;">아직 메모가 없습니다</div>';
 
-  let assigneeHtml = t.assignees.map(a => `<span class="avatar-xs av-${ids[a]||'jiwon'}" style="width:22px;height:22px;font-size:10px;display:inline-flex;">${a[0]}</span> ${a}`).join(' &nbsp; ');
+  let assigneeHtml = t.assignees.map(a => {
+    const uid = getIdByName(a);
+    const user = getUserByName(a);
+    const initial = user ? user.initial : a[0];
+    return `<span class="avatar-xs av-${uid}" style="width:22px;height:22px;font-size:10px;display:inline-flex;">${initial}</span> ${a}`;
+  }).join(' &nbsp; ');
 
   document.getElementById('taskDetailPanel').innerHTML = `
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
@@ -1322,7 +1882,6 @@ function renderKanban() {
   const todo = tasks.filter(t => t.status === '시작전');
   const progress = tasks.filter(t => t.status === '진행중');
   const done = tasks.filter(t => t.status === '완료');
-  const ids = {지원:'jiwon',소영:'soyoung',슬기:'seulgi'};
 
   function renderCol(items, headerClass, title, icon) {
     let cards = items.map(t => {
@@ -1336,7 +1895,7 @@ function renderKanban() {
       return `<div class="kanban-card" style="${doneStyle}" draggable="true" ondragstart="kDrag(event,${t.id})" data-id="${t.id}" oncontextmenu="showContextMenu(event,${t.id})">
         <div class="kc-title" style="${titleStyle}">${t.title}</div>
         <div class="kc-meta"><span class="kc-priority ${pCls}">${pLabel}</span>${t.deadline ? `<span class="kc-deadline" style="${dlStyle}">📅 ${t.deadline.slice(5)}${dlSuffix}</span>` : ''}${t.memos.length ? `<span class="kc-memo-count">📝${t.memos.length}</span>` : ''}</div>
-        <div class="kc-assignees">${t.assignees.map(a=>`<div class="kc-av av-${ids[a]||'jiwon'}">${a[0]}</div>`).join('')}</div>
+        <div class="kc-assignees">${t.assignees.map(a=>{const uid=getIdByName(a);const user=getUserByName(a);return `<div class="kc-av av-${uid}">${user?user.initial:a[0]}</div>`;}).join('')}</div>
       </div>`;
     }).join('');
     return `<div class="kanban-col" ondrop="kDrop(event,'${title}')" ondragover="kAllow(event)" ondragleave="kLeave(this)">
@@ -1461,13 +2020,12 @@ function selectCalDay(day, month, year, dateStr) {
     document.getElementById('calDetailList').innerHTML = '<div style="text-align:center;color:#ccc;padding:20px;">이 날에는 일정이 없습니다</div>';
   }
 
-  // highlight selected day
   document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'));
 }
 
 function renderWeekView() {
   const days = ['일','월','화','수','목','금','토'];
-  const start = new Date(2026, 2, 15); // Sunday
+  const start = new Date(2026, 2, 15);
   let headerHtml = '<div class="week-header-cell"></div>';
   for (let i = 0; i < 7; i++) {
     const d = new Date(start); d.setDate(d.getDate() + i);
@@ -1519,7 +2077,7 @@ function renderTeam() {
   if (teamViewMode === 'table') {
     let rows = tasks.map(t => {
       const pBadge = t.priority === 'urgent' ? '<span class="cat-badge badge-urgent" style="font-size:10px;">긴급</span>' : '<span class="cat-badge badge-normal" style="font-size:10px;">일보따리</span>';
-      const statusCls = t.status === '완료' ? 'color:#22c55e' : t.status === '진행중' ? 'color:#f59e0b' : 'color:#94a3b8';
+      const statusCls = t.status === '완료' ? 'color:#2e7d32' : t.status === '진행중' ? 'color:#f59e0b' : 'color:#94a3b8';
       return `<tr><td>${t.title}</td><td>${pBadge}</td><td style="${statusCls};font-weight:600;">${t.status}</td><td>${t.deadline||'-'}</td><td>${t.assignees.join(', ')}</td></tr>`;
     }).join('');
 
@@ -1527,11 +2085,9 @@ function renderTeam() {
       <thead><tr><th>업무명 ↕</th><th>우선순위 ↕</th><th>상태 ↕</th><th>마감일 ↕</th><th>담당자</th></tr></thead>
       <tbody>${rows}</tbody></table>`;
   } else {
-    const members = ['지원','소영','슬기'];
-    const ids = {지원:'jiwon',소영:'soyoung',슬기:'seulgi'};
-    const html = members.map(m => {
-      const memberTasks = tasks.filter(t => t.assignees.includes(m));
-      return `<div><div class="category-header" style="margin-bottom:10px;"><div class="avatar-xs av-${ids[m]}">${m[0]}</div><span style="font-weight:700;font-size:14px;">${m}</span><span class="cat-count">${memberTasks.length}건</span></div>
+    const html = USERS.map(u => {
+      const memberTasks = tasks.filter(t => t.assignees.includes(u.name));
+      return `<div><div class="category-header" style="margin-bottom:10px;"><div class="avatar-xs av-${u.id}">${u.initial}</div><span style="font-weight:700;font-size:14px;">${u.name}</span><span class="cat-count">${memberTasks.length}건</span></div>
         ${memberTasks.map(t => renderTaskCard(t)).join('')}</div>`;
     }).join('');
     document.getElementById('teamContent').innerHTML = `<div class="team-card-grid">${html}</div>`;
@@ -1595,7 +2151,7 @@ function selectMeeting(id) {
       <button class="btn-delete" onclick="deleteMeeting(${m.id})">삭제</button>
     </div>`;
 
-  renderMeetings(); // refresh selection state
+  renderMeetings();
 }
 
 function toggleMeetingCheck(meetingId, idx) {
@@ -1614,8 +2170,7 @@ let noticeTabFilter = 'all';
 
 function renderNotices() {
   const notices = appData.notices;
-  const allMembers = ['지원','소영','슬기'];
-  const ids = {지원:'jiwon',소영:'soyoung',슬기:'seulgi'};
+  const allMembers = USERS.map(u => u.name);
   const typeClass = {'타임세일':'nt-sale','증정이벤트':'nt-gift','공지':'nt-general'};
 
   const filtered = notices.filter(n => {
@@ -1630,7 +2185,7 @@ function renderNotices() {
 
   document.getElementById('noticeList').innerHTML = filtered.map(n => {
     const isUnread = !n.readBy.includes(currentUser?.name);
-    const cls = isUnread ? 'unread-notice' : (n.readBy.length >= 3 ? 'read-notice' : '');
+    const cls = isUnread ? 'unread-notice' : (n.readBy.length >= allMembers.length ? 'read-notice' : '');
     const sel = selectedNoticeId === n.id ? 'selected-notice' : '';
     const readCount = n.readBy.length;
     return `<div class="notice-card ${cls} ${sel}" onclick="selectNotice(${n.id})">
@@ -1643,8 +2198,8 @@ function renderNotices() {
       <div class="notice-preview">${escapeHtml(n.content).slice(0,80)}...</div>
       <div class="notice-footer">
         <span class="notice-author">${n.author}</span>
-        <span class="notice-read-status">읽음 ${readCount}/3
-          <span class="read-avatars">${allMembers.map(m => `<span class="read-av av-${ids[m]} ${n.readBy.includes(m)?'':'unread-av'}">${m[0]}</span>`).join('')}</span>
+        <span class="notice-read-status">읽음 ${readCount}/${allMembers.length}
+          <span class="read-avatars">${allMembers.map(m => {const uid=getIdByName(m);const user=getUserByName(m);return `<span class="read-av av-${uid} ${n.readBy.includes(m)?'':'unread-av'}">${user?user.initial:m[0]}</span>`;}).join('')}</span>
         </span>
       </div>
     </div>`;
@@ -1663,14 +2218,12 @@ function selectNotice(id) {
   const n = appData.notices.find(n => n.id === id);
   if (!n) return;
 
-  // Mark as read
   if (currentUser && !n.readBy.includes(currentUser.name)) {
     n.readBy.push(currentUser.name);
     saveData();
   }
 
-  const allMembers = ['지원','소영','슬기'];
-  const ids = {지원:'jiwon',소영:'soyoung',슬기:'seulgi'};
+  const allMembers = USERS.map(u => u.name);
   const typeClass = {'타임세일':'nt-sale','증정이벤트':'nt-gift','공지':'nt-general'};
 
   document.getElementById('noticeDetailPanel').innerHTML = `
@@ -1683,9 +2236,9 @@ function selectNotice(id) {
     </div>
     <div class="notice-detail-content">${escapeHtml(n.content)}</div>
     <div class="notice-read-section">
-      <div class="notice-read-title">읽음 확인 (${n.readBy.length}/3)</div>
+      <div class="notice-read-title">읽음 확인 (${n.readBy.length}/${allMembers.length})</div>
       <div class="notice-read-list">
-        ${allMembers.map(m => `<div class="notice-read-person ${n.readBy.includes(m)?'is-read':'not-read'}"><span class="avatar-xs av-${ids[m]}" style="width:24px;height:24px;font-size:10px;">${m[0]}</span> ${m} ${n.readBy.includes(m)?'✅':'❌'}</div>`).join('')}
+        ${allMembers.map(m => {const uid=getIdByName(m);const user=getUserByName(m);return `<div class="notice-read-person ${n.readBy.includes(m)?'is-read':'not-read'}"><span class="avatar-xs av-${uid}" style="width:24px;height:24px;font-size:10px;">${user?user.initial:m[0]}</span> ${m} ${n.readBy.includes(m)?'✅':'❌'}</div>`;}).join('')}
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
@@ -1718,27 +2271,24 @@ function renderMonthlyReport() {
   const progress = tasks.filter(t => t.status === '진행중');
   const urgentDone = done.filter(t => t.priority === 'urgent');
 
-  // 팀원별 완료율
-  const members = ['지원','소영','슬기'];
-  const colors = {지원:'#667eea',소영:'#f093fb',슬기:'#4facfe'};
-  let avgDays = done.length ? Math.round(done.length * 2.3) : 0; // simulated
+  let avgDays = done.length ? Math.round(done.length * 2.3) : 0;
 
   document.getElementById('reportStats').innerHTML = `
     <div class="stat-card"><div class="stat-number num-done">${done.length}</div><div class="stat-label">완료</div></div>
     <div class="stat-card"><div class="stat-number num-progress">${progress.length}</div><div class="stat-label">진행중</div></div>
     <div class="stat-card"><div class="stat-number num-urgent">${urgentDone.length}</div><div class="stat-label">긴급 처리</div></div>
-    <div class="stat-card"><div class="stat-number" style="color:#667eea;">${avgDays}일</div><div class="stat-label">평균 처리 기간</div></div>
-    <div class="stat-card"><div class="stat-number" style="color:#10b981;">${tasks.length ? Math.round(done.length/tasks.length*100) : 0}%</div><div class="stat-label">전체 완료율</div></div>`;
+    <div class="stat-card"><div class="stat-number" style="color:#155940;">${avgDays}일</div><div class="stat-label">평균 처리 기간</div></div>
+    <div class="stat-card"><div class="stat-number" style="color:#2e7d32;">${tasks.length ? Math.round(done.length/tasks.length*100) : 0}%</div><div class="stat-label">전체 완료율</div></div>`;
 
   document.getElementById('completedTaskList').innerHTML = done.map(t =>
     `<div class="completed-task"><span class="ct-check">✓</span><span class="ct-title">${t.title}</span><span class="ct-who">${t.assignees.join(',')}</span><span class="ct-date">${t.deadline?t.deadline.slice(5):''}</span></div>`
   ).join('');
 
-  document.getElementById('teamChart').innerHTML = members.map(m => {
-    const total = tasks.filter(t => t.assignees.includes(m)).length;
-    const completed = tasks.filter(t => t.assignees.includes(m) && t.status === '완료').length;
+  document.getElementById('teamChart').innerHTML = USERS.map(u => {
+    const total = tasks.filter(t => t.assignees.includes(u.name)).length;
+    const completed = tasks.filter(t => t.assignees.includes(u.name) && t.status === '완료').length;
     const pct = total ? Math.round(completed/total*100) : 0;
-    return `<div class="bar-row"><span class="bar-label">${m}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[m]};">${pct}%</div></div><span class="bar-value">${completed}/${total}</span></div>`;
+    return `<div class="bar-row"><span class="bar-label">${u.name}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${u.color};">${pct}%</div></div><span class="bar-value">${completed}/${total}</span></div>`;
   }).join('');
 }
 
@@ -1787,9 +2337,9 @@ function filterMemos(input) {
 function renderNotifications() {
   const notifs = [
     { text: '🔴 <b>제안서 수정</b> 마감일이 지났습니다!', time: '1시간 전', unread: true },
-    { text: '📋 <b>소영</b>님이 SNS 검토를 요청했습니다', time: '3시간 전', unread: true },
+    { text: '📋 <b>임소영</b>님이 SNS 검토를 요청했습니다', time: '3시간 전', unread: true },
     { text: '⏰ <b>예산안 확인</b> 마감이 내일입니다', time: '오전 9시', unread: true },
-    { text: '✅ <b>슬기</b>님이 모니터링 설정을 완료', time: '어제', unread: false },
+    { text: '✅ <b>박슬기</b>님이 모니터링 설정을 완료', time: '어제', unread: false },
   ];
   document.getElementById('notifList').innerHTML = notifs.map(n =>
     `<div class="notif-item ${n.unread?'unread':''}"><div class="notif-text">${n.text}</div><div class="notif-time">${n.time}</div></div>`
@@ -1850,6 +2400,604 @@ function renderPW() {
 function changePW(d) { pwWeekOffset += d; renderPW(); }
 
 // ═══════════════════════════════════════
+//  10. 반복 업무
+// ═══════════════════════════════════════
+let recurringFilter = 'all';
+let recurringUserFilterVal = 'all';
+
+function filterRecurring(el, filter) {
+  document.querySelectorAll('#recurringCycleFilter .filter-chip').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  recurringFilter = filter;
+  renderRecurring();
+}
+
+function filterRecurringUser(el, name) {
+  document.querySelectorAll('#recurringUserFilter .filter-chip').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  recurringUserFilterVal = name;
+  renderRecurring();
+}
+
+function renderRecurring() {
+  let tasks = appData.recurringTasks;
+  if (recurringFilter !== 'all') tasks = tasks.filter(t => t.cycle === recurringFilter);
+  if (recurringUserFilterVal !== 'all') tasks = tasks.filter(t => t.assignees.includes(recurringUserFilterVal));
+
+  if (!tasks.length) {
+    document.getElementById('recurringList').innerHTML = '<div class="empty-detail">등록된 반복 업무가 없습니다</div>';
+    return;
+  }
+
+  const dayNames = ['일','월','화','수','목','금','토'];
+
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(2026, 2 - i, 1);
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    const label = (d.getMonth()+1) + '월';
+    months.push({ key, label });
+  }
+
+  const weeks = [];
+  for (let i = 7; i >= 0; i--) {
+    const d = new Date(2026, 2, 18 - i * 7);
+    const weekNum = getISOWeek(d);
+    const key = d.getFullYear() + '-W' + String(weekNum).padStart(2,'0');
+    const mStart = (d.getMonth()+1) + '/' + d.getDate();
+    weeks.push({ key, label: key.split('-')[1] + ' (' + mStart + ')' });
+  }
+
+  document.getElementById('recurringList').innerHTML = tasks.map(t => {
+    let cycleBadge, dayInfo;
+    if (t.cycle === 'weekly') {
+      cycleBadge = '<span class="cycle-badge cycle-weekly">매주</span>';
+      dayInfo = `매주 ${dayNames[t.dayOfWeek]}요일`;
+    } else if (t.cycle === 'monthly') {
+      cycleBadge = '<span class="cycle-badge cycle-monthly">매월</span>';
+      dayInfo = `매월 ${t.day}일`;
+    } else {
+      cycleBadge = '<span class="cycle-badge cycle-yearly">매년</span>';
+      dayInfo = `매년 ${t.month}월 ${t.day}일`;
+    }
+
+    const assigneeHtml = t.assignees.map(a => {
+      const uid = getIdByName(a);
+      const user = getUserByName(a);
+      return `<span class="avatar-xs av-${uid}" style="width:22px;height:22px;font-size:10px;display:inline-flex;">${user?user.initial:a[0]}</span>`;
+    }).join(' ');
+
+    let timelineHtml;
+    if (t.cycle === 'weekly') {
+      timelineHtml = weeks.map(w => {
+        const isDone = t.history[w.key] === true;
+        return `<div class="timeline-month">
+          <span class="timeline-label">${w.label}</span>
+          <div class="timeline-check ${isDone ? 'done' : ''}" onclick="toggleRecurringHistory(${t.id},'${w.key}')">${isDone ? '✅' : '☐'}</div>
+        </div>`;
+      }).join('');
+    } else {
+      timelineHtml = months.map(m => {
+        const isDone = t.history[m.key] === true;
+        if (t.cycle === 'yearly' && parseInt(m.key.split('-')[1]) !== t.month) {
+          return `<div class="timeline-month"><span class="timeline-label">${m.label}</span><div class="timeline-check" style="opacity:0.3;cursor:default;background:#f5f5f5;">-</div></div>`;
+        }
+        return `<div class="timeline-month">
+          <span class="timeline-label">${m.label}</span>
+          <div class="timeline-check ${isDone ? 'done' : ''}" onclick="toggleRecurringHistory(${t.id},'${m.key}')">${isDone ? '✅' : '☐'}</div>
+        </div>`;
+      }).join('');
+    }
+
+    return `<div class="recurring-card" oncontextmenu="showRecurringContextMenu(event,${t.id})">
+      <div class="recurring-card-top">
+        <span class="recurring-card-title">${escapeHtml(t.title)}</span>
+        ${cycleBadge}
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <span class="recurring-day-info">📅 ${dayInfo}</span>
+        <span class="recurring-assignees">👤 ${t.assignees.join(', ')}</span>
+        <span style="margin-left:auto;">${assigneeHtml}</span>
+      </div>
+      <div class="recurring-timeline">${timelineHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function getISOWeek(date) {
+  const d = new Date(date.getTime());
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+  const week1 = new Date(d.getFullYear(), 0, 4);
+  return 1 + Math.round(((d - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+}
+
+function toggleRecurringHistory(id, monthKey) {
+  const t = appData.recurringTasks.find(t => t.id === id);
+  if (!t) return;
+  if (t.history.hasOwnProperty(monthKey)) {
+    t.history[monthKey] = !t.history[monthKey];
+  } else {
+    t.history[monthKey] = true;
+  }
+  saveData();
+  renderRecurring();
+}
+
+function showRecurringContextMenu(e, id) {
+  e.preventDefault();
+  if (confirm('이 반복 업무를 삭제하시겠습니까?')) {
+    appData.recurringTasks = appData.recurringTasks.filter(t => t.id !== id);
+    saveData();
+    renderRecurring();
+  }
+}
+
+let addRecurringCycle = 'monthly';
+function selRecurringCycle(el, cycle) {
+  el.parentElement.querySelectorAll('.priority-option').forEach(e => {
+    e.style.borderColor = '#eee'; e.style.background = '#fff'; e.style.color = '#333';
+    e.className = 'priority-option';
+  });
+  addRecurringCycle = cycle;
+  if (cycle === 'weekly') {
+    el.style.borderColor = '#155940'; el.style.background = '#d4edda'; el.style.color = '#155940';
+    document.getElementById('recurringDayOfWeekField').style.display = 'block';
+    document.getElementById('recurringDayField').style.display = 'none';
+    document.getElementById('recurringMonthField').style.display = 'none';
+  } else if (cycle === 'monthly') {
+    el.style.borderColor = '#2563eb'; el.style.background = '#dbeafe'; el.style.color = '#2563eb';
+    document.getElementById('recurringDayOfWeekField').style.display = 'none';
+    document.getElementById('recurringDayField').style.display = 'block';
+    document.getElementById('recurringMonthField').style.display = 'none';
+  } else {
+    el.style.borderColor = '#be185d'; el.style.background = '#fce7f3'; el.style.color = '#be185d';
+    document.getElementById('recurringDayOfWeekField').style.display = 'none';
+    document.getElementById('recurringDayField').style.display = 'block';
+    document.getElementById('recurringMonthField').style.display = 'block';
+  }
+}
+
+function saveRecurring() {
+  const title = document.getElementById('addRecurringTitle').value.trim();
+  if (!title) return alert('업무 제목을 입력하세요');
+  const assignees = [...document.querySelectorAll('#addRecurringAssignees .assignee-chip.selected')].map(e => e.textContent);
+  if (!assignees.length) return alert('담당 팀원을 선택하세요');
+
+  const newId = Math.max(...appData.recurringTasks.map(t => t.id), 0) + 1;
+  const newTask = { id: newId, title, cycle: addRecurringCycle, assignees, history: {} };
+
+  if (addRecurringCycle === 'weekly') {
+    newTask.dayOfWeek = parseInt(document.getElementById('addRecurringDayOfWeek').value);
+  } else {
+    newTask.day = parseInt(document.getElementById('addRecurringDay').value) || 1;
+    if (addRecurringCycle === 'yearly') {
+      newTask.month = parseInt(document.getElementById('addRecurringMonth').value);
+    }
+  }
+
+  appData.recurringTasks.push(newTask);
+  saveData();
+  closeModal('recurringAddModal');
+  renderRecurring();
+
+  document.getElementById('addRecurringTitle').value = '';
+  document.getElementById('addRecurringDay').value = '1';
+  document.querySelectorAll('#addRecurringAssignees .assignee-chip').forEach(e => e.classList.remove('selected'));
+}
+
+// ═══════════════════════════════════════
+//  11. 팀 목표
+// ═══════════════════════════════════════
+let goalsMonthOffset = 0;
+
+function getGoalsMonthKey() {
+  const d = new Date(2026, 2 + goalsMonthOffset, 1);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+
+function getGoalsMonthLabel() {
+  const d = new Date(2026, 2 + goalsMonthOffset, 1);
+  return (d.getMonth()+1) + '월';
+}
+
+function progressColor(p) {
+  if (p < 30) return 'red';
+  if (p <= 70) return 'yellow';
+  return 'green';
+}
+
+function renderGoals() {
+  const goals = appData.teamGoals;
+
+  let yearlyHtml = goals.yearly.map(g => {
+    const col = progressColor(g.progress);
+    return `<div class="goal-card">
+      <div class="goal-card-top">
+        <span class="goal-card-title">${escapeHtml(g.title)}</span>
+        <button class="goal-edit-btn" onclick="openGoalEdit('yearly',${g.id})">수정</button>
+      </div>
+      <div class="goal-progress-text ${col}">${g.progress}%</div>
+      <div class="goal-progress-bar"><div class="goal-progress-fill ${col}" style="width:${g.progress}%;"></div></div>
+      <div class="goal-notes">${escapeHtml(g.notes)}</div>
+    </div>`;
+  }).join('');
+
+  const monthKey = getGoalsMonthKey();
+  const monthLabel = getGoalsMonthLabel();
+  const monthlyGoals = goals.monthly[monthKey] || [];
+  let monthlyHtml = monthlyGoals.map(g => {
+    const col = progressColor(g.progress);
+    return `<div class="goal-card">
+      <div class="goal-card-top">
+        <span class="goal-card-title">${escapeHtml(g.title)}</span>
+        <button class="goal-edit-btn" onclick="openGoalEdit('monthly',${g.id})">수정</button>
+      </div>
+      <div class="goal-progress-text ${col}">${g.progress}%</div>
+      <div class="goal-progress-bar"><div class="goal-progress-fill ${col}" style="width:${g.progress}%;"></div></div>
+      <div class="goal-notes">${escapeHtml(g.notes)}</div>
+    </div>`;
+  }).join('');
+
+  if (!monthlyHtml) {
+    monthlyHtml = '<div class="empty-detail" style="padding:30px;">이 달에는 아직 목표가 없습니다</div>';
+  }
+
+  document.getElementById('goalsContent').innerHTML = `
+    <div class="goals-section">
+      <div class="goals-section-title">🎯 2026 연간 목표</div>
+      ${yearlyHtml}
+    </div>
+    <div class="goals-section">
+      <div class="goals-section-title">
+        📅 ${monthLabel} 월간 목표
+        <div class="goals-nav">
+          <button class="goals-nav-btn" onclick="changeGoalsMonth(-1)">◀</button>
+          <span class="goals-month-label">${monthLabel}</span>
+          <button class="goals-nav-btn" onclick="changeGoalsMonth(1)">▶</button>
+          <button class="goal-add-btn" onclick="openModal('goalAddModal')" style="margin-left:8px;">+ 목표 추가</button>
+        </div>
+      </div>
+      ${monthlyHtml}
+    </div>`;
+}
+
+function changeGoalsMonth(d) {
+  goalsMonthOffset += d;
+  renderGoals();
+}
+
+let editGoalType = null;
+let editGoalId = null;
+
+function openGoalEdit(type, id) {
+  editGoalType = type;
+  editGoalId = id;
+  let g;
+  if (type === 'yearly') {
+    g = appData.teamGoals.yearly.find(g => g.id === id);
+  } else {
+    const monthKey = getGoalsMonthKey();
+    const list = appData.teamGoals.monthly[monthKey] || [];
+    g = list.find(g => g.id === id);
+  }
+  if (!g) return;
+  document.getElementById('goalEditTitle').textContent = '🎯 목표 수정';
+  document.getElementById('editGoalTitle').value = g.title;
+  document.getElementById('editGoalProgress').value = g.progress;
+  document.getElementById('editGoalNotes').value = g.notes;
+  openModal('goalEditModal');
+}
+
+function saveGoalEdit() {
+  let g;
+  if (editGoalType === 'yearly') {
+    g = appData.teamGoals.yearly.find(g => g.id === editGoalId);
+  } else {
+    const monthKey = getGoalsMonthKey();
+    const list = appData.teamGoals.monthly[monthKey] || [];
+    g = list.find(g => g.id === editGoalId);
+  }
+  if (!g) return;
+  g.title = document.getElementById('editGoalTitle').value.trim() || g.title;
+  g.progress = Math.max(0, Math.min(100, parseInt(document.getElementById('editGoalProgress').value) || 0));
+  g.notes = document.getElementById('editGoalNotes').value.trim();
+  saveData();
+  closeModal('goalEditModal');
+  renderGoals();
+}
+
+function saveNewGoal() {
+  const title = document.getElementById('addGoalTitle').value.trim();
+  if (!title) return alert('목표를 입력하세요');
+  const progress = Math.max(0, Math.min(100, parseInt(document.getElementById('addGoalProgress').value) || 0));
+  const notes = document.getElementById('addGoalNotes').value.trim();
+  const monthKey = getGoalsMonthKey();
+  if (!appData.teamGoals.monthly[monthKey]) appData.teamGoals.monthly[monthKey] = [];
+  const list = appData.teamGoals.monthly[monthKey];
+  const newId = list.length ? Math.max(...list.map(g => g.id)) + 1 : 1;
+  list.push({ id: newId, title, progress, notes });
+  saveData();
+  closeModal('goalAddModal');
+  renderGoals();
+  document.getElementById('addGoalTitle').value = '';
+  document.getElementById('addGoalProgress').value = '0';
+  document.getElementById('addGoalNotes').value = '';
+}
+
+// ═══════════════════════════════════════
+//  12. AI 어시스턴트 (플로팅)
+// ═══════════════════════════════════════
+let chatInitialized = false;
+
+function toggleChatPanel() {
+  const panel = document.getElementById('chatFloatPanel');
+  const fab = document.getElementById('chatFab');
+  const isOpen = panel.classList.contains('show');
+  if (isOpen) {
+    panel.classList.remove('show');
+    fab.classList.remove('active');
+    fab.textContent = '🤖';
+  } else {
+    panel.classList.add('show');
+    fab.classList.add('active');
+    fab.textContent = '✕';
+    initChat();
+    document.getElementById('chatInput').focus();
+    scrollChatToBottom();
+  }
+}
+
+function clearChat() {
+  if (!confirm('대화 기록을 초기화할까요?')) return;
+  appData.chatHistory = [];
+  saveData();
+  document.getElementById('chatMessages').innerHTML = '';
+  chatInitialized = false;
+  initChat();
+}
+
+function initChat() {
+  if (chatInitialized) return;
+  chatInitialized = true;
+  const msgs = document.getElementById('chatMessages');
+  if (appData.chatHistory.length === 0) {
+    const displayName = getDisplayName(currentUser.id);
+    addBotMessage(`안녕하세요, ${displayName}님! 🤖 AI 어시스턴트입니다.
+
+저는 다음과 같은 일들을 도와드릴 수 있어요:
+
+- 📋 업무 등록/조회/완료 처리
+- 📝 회의록 조회
+- 📢 공지 확인
+- 📅 일정 조회
+- 도움이 필요하면 "도움"을 입력해주세요!
+
+무엇을 도와드릴까요?`);
+  } else {
+    appData.chatHistory.forEach(msg => {
+      appendChatBubble(msg.role, msg.text);
+    });
+  }
+  scrollChatToBottom();
+}
+
+function appendChatBubble(role, text) {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + role;
+  if (role === 'bot') {
+    div.innerHTML = `<div class="chat-avatar bot-av">🤖</div><div class="chat-bubble">${escapeHtml(text)}</div>`;
+  } else {
+    const avClass = currentUser ? 'av-' + currentUser.id : '';
+    const initial = currentUser ? getUserShortName(currentUser.id) : '?';
+    div.innerHTML = `<div class="chat-avatar user-av ${avClass}">${initial}</div><div class="chat-bubble">${escapeHtml(text)}</div>`;
+  }
+  msgs.appendChild(div);
+}
+
+function addBotMessage(text) {
+  appData.chatHistory.push({ role: 'bot', text });
+  appendChatBubble('bot', text);
+  saveData();
+}
+
+function addUserMessage(text) {
+  appData.chatHistory.push({ role: 'user', text });
+  appendChatBubble('user', text);
+  saveData();
+}
+
+function scrollChatToBottom() {
+  const msgs = document.getElementById('chatMessages');
+  setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 50);
+}
+
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addUserMessage(text);
+  scrollChatToBottom();
+
+  setTimeout(() => {
+    const response = processChat(text);
+    addBotMessage(response);
+    scrollChatToBottom();
+  }, 300);
+}
+
+function processChat(msg) {
+  const m = msg.toLowerCase();
+
+  if (m === '도움' || m === '도움말' || m === 'help' || m === '안녕' || m === '안녕하세요' || m === '하이' || m === 'hi' || m === 'hello') {
+    return `안녕하세요! 사용 가능한 명령어입니다:
+
+📋 업무 관련:
+- "업무 등록: [업무 제목]" - 새 업무 등록
+- "내 업무 뭐 있어?" - 내 업무 목록 조회
+- "긴급 업무 보여줘" - 긴급 업무 조회
+- "[이름] 업무 뭐 있어?" - 특정 팀원 업무 조회
+- "[업무명] 완료 처리해줘" - 업무 완료 처리
+
+📝 회의록: "최근 회의 보여줘"
+📢 공지: "안 읽은 공지 있어?"
+📅 일정: "오늘 일정 알려줘" / "이번 주 일정"`;
+  }
+
+  if (m.includes('등록') || m.includes('추가')) {
+    let title = '';
+    const colonMatch = msg.match(/[등록추가][:\s]+(.+)/);
+    if (colonMatch) {
+      title = colonMatch[1].replace(/(해줘|해주세요|할게|하자|요|줘)$/g, '').trim();
+    }
+    if (!title) {
+      const beforeMatch = msg.match(/(.+?)\s*(업무\s*)?(등록|추가)/);
+      if (beforeMatch) {
+        title = beforeMatch[1].replace(/(긴급|새|새로운)\s*/g, '').trim();
+      }
+    }
+    if (!title || title.length < 2) {
+      return '업무 제목을 알려주세요! 예: "기획서 제출 업무 등록해줘"';
+    }
+
+    const isUrgent = m.includes('긴급');
+    let deadline = '';
+    if (m.includes('내일')) {
+      deadline = '2026-03-19';
+    } else if (m.includes('오늘')) {
+      deadline = '2026-03-18';
+    }
+
+    const newId = Math.max(...appData.tasks.map(t => t.id), 0) + 1;
+    appData.tasks.push({
+      id: newId,
+      title: title,
+      priority: isUrgent ? 'urgent' : 'normal',
+      status: '시작전',
+      deadline: deadline,
+      assignees: [currentUser.name],
+      memos: []
+    });
+    saveData();
+    renderAll();
+
+    let response = `✅ 업무를 등록했습니다!\n\n📋 ${title}`;
+    if (isUrgent) response += '\n🔴 우선순위: 긴급';
+    if (deadline) response += `\n📅 마감일: ${deadline}`;
+    response += `\n👤 담당: ${currentUser.name}`;
+    return response;
+  }
+
+  if (m.includes('업무') && (m.includes('뭐') || m.includes('조회') || m.includes('알려') || m.includes('보여') || m.includes('목록') || m.includes('있어') || m.includes('있나'))) {
+    let targetName = currentUser.name;
+    let label = '내';
+
+    // Check for any user name in message
+    for (const u of USERS) {
+      if (m.includes(u.name) || m.includes(u.name.slice(1))) {
+        targetName = u.name;
+        label = u.name + '님의';
+        break;
+      }
+    }
+
+    let tasks;
+    if (m.includes('긴급')) {
+      tasks = appData.tasks.filter(t => t.priority === 'urgent' && t.status !== '완료');
+      label = '긴급';
+    } else {
+      tasks = appData.tasks.filter(t => t.assignees.includes(targetName) && t.status !== '완료');
+    }
+
+    if (!tasks.length) {
+      return `${label} 미완료 업무가 없습니다! 🎉`;
+    }
+
+    let response = `📋 ${label} 업무 목록 (${tasks.length}건):\n`;
+    tasks.forEach((t, i) => {
+      const priority = t.priority === 'urgent' ? '🔴' : '🔵';
+      const status = t.status === '진행중' ? '🔄' : '📋';
+      const dl = t.deadline ? ` (마감: ${t.deadline.slice(5)})` : '';
+      response += `\n${i+1}. ${priority}${status} ${t.title}${dl}`;
+    });
+    return response;
+  }
+
+  if (m.includes('회의') && (m.includes('조회') || m.includes('알려') || m.includes('보여') || m.includes('목록') || m.includes('있어') || m.includes('있나') || m.includes('뭐') || m.includes('최근'))) {
+    const meetings = appData.meetings;
+    if (!meetings.length) return '등록된 회의록이 없습니다.';
+    const latest = meetings[0];
+    const checked = latest.checks.filter(c => c.done).length;
+    const total = latest.checks.length;
+    return `📝 최근 회의록: ${latest.title}\n📅 ${latest.date}\n👥 참석: ${latest.attendees.join(', ')}\n\n📋 안건:\n${latest.agenda}\n\n✅ 체크사항: ${checked}/${total} 완료`;
+  }
+
+  if (m.includes('공지') && (m.includes('조회') || m.includes('알려') || m.includes('보여') || m.includes('목록') || m.includes('있어') || m.includes('있나') || m.includes('읽'))) {
+    const unread = appData.notices.filter(n => !n.readBy.includes(currentUser.name));
+    if (m.includes('읽') && (m.includes('안') || m.includes('못'))) {
+      if (!unread.length) return '안 읽은 공지가 없습니다! ✅';
+      let response = `📢 안 읽은 공지 (${unread.length}건):\n`;
+      unread.forEach((n, i) => {
+        response += `\n${i+1}. ${n.title}\n   📅 ${n.date} · ${n.author}`;
+      });
+      return response;
+    }
+    const notices = appData.notices;
+    let response = `📢 공지 목록 (${notices.length}건):\n`;
+    notices.forEach((n, i) => {
+      const readMark = n.readBy.includes(currentUser.name) ? '✅' : '🔴';
+      response += `\n${i+1}. ${readMark} ${n.title}`;
+    });
+    if (unread.length) response += `\n\n💡 안 읽은 공지가 ${unread.length}건 있습니다.`;
+    return response;
+  }
+
+  if ((m.includes('일정') || m.includes('캘린더')) && (m.includes('조회') || m.includes('알려') || m.includes('보여') || m.includes('뭐') || m.includes('있어'))) {
+    if (m.includes('오늘')) {
+      const events = getCalEvents('2026-03-18');
+      if (!events.length) return '📅 오늘은 등록된 일정이 없습니다.';
+      let response = `📅 오늘(3/18) 일정 (${events.length}건):\n`;
+      events.forEach((e, i) => {
+        response += `\n${i+1}. ${e.title} (${e.who})`;
+      });
+      return response;
+    }
+    let response = '📅 이번 주 일정:\n';
+    for (let d = 16; d <= 22; d++) {
+      const dateStr = '2026-03-' + String(d).padStart(2,'0');
+      const events = getCalEvents(dateStr);
+      if (events.length) {
+        response += `\n${d}일: `;
+        events.forEach(e => { response += `${e.title}, `; });
+        response = response.slice(0, -2);
+      }
+    }
+    return response;
+  }
+
+  if (m.includes('완료')) {
+    const taskName = msg.replace(/(완료|처리|해줘|해주세요|해 줘|해 주세요|를|을|좀)/g, '').trim();
+    if (taskName.length < 2) {
+      return '어떤 업무를 완료 처리할까요? 업무 이름을 알려주세요.';
+    }
+    const task = appData.tasks.find(t =>
+      t.title.includes(taskName) && t.status !== '완료'
+    );
+    if (task) {
+      task.status = '완료';
+      saveData();
+      renderAll();
+      return `✅ "${task.title}"을(를) 완료 처리했습니다!`;
+    }
+    return `"${taskName}"에 해당하는 미완료 업무를 찾을 수 없습니다. 정확한 업무명을 입력해주세요.`;
+  }
+
+  return '죄송합니다, 잘 이해하지 못했어요. "도움"을 입력하면 사용 가능한 명령어를 확인할 수 있습니다.';
+}
+
+// ═══════════════════════════════════════
 //  데이터 저장 (모달에서)
 // ═══════════════════════════════════════
 function saveTask() {
@@ -1869,7 +3017,6 @@ function saveTask() {
   appData.tasks.push({ id: newId, title, priority, status, deadline, assignees, memos: memo ? [{date:'3/18',text:memo}] : [] });
   saveData(); closeModal('addModal'); renderAll();
 
-  // Reset form
   document.getElementById('addTaskTitle').value = '';
   document.getElementById('addTaskDeadline').value = '';
   document.getElementById('addTaskMemo').value = '';
@@ -1881,7 +3028,7 @@ function saveNotice() {
   if (!title) return alert('공지 제목을 입력하세요');
   const content = document.getElementById('addNoticeContent').value.trim();
   const newId = Math.max(...appData.notices.map(n => n.id), 0) + 1;
-  appData.notices.unshift({ id: newId, title, type: '공지', date: '2026-03-18', author: currentUser?.name || '지원', content, readBy: [currentUser?.name || '지원'] });
+  appData.notices.unshift({ id: newId, title, type: '공지', date: '2026-03-18', author: currentUser?.name || '이지원', content, readBy: [currentUser?.name || '이지원'] });
   saveData(); closeModal('noticeAddModal'); renderNotices();
   document.getElementById('addNoticeTitle').value = '';
   document.getElementById('addNoticeContent').value = '';
@@ -1913,7 +3060,7 @@ function saveMemo() {
   if (!title) return alert('메모 제목을 입력하세요');
   const content = document.getElementById('addMemoContent').value.trim();
   const newId = Math.max(...appData.memos.map(m => m.id), 0) + 1;
-  appData.memos.unshift({ id: newId, title, content, date: '2026-03-18', owner: currentUser?.name || '지원' });
+  appData.memos.unshift({ id: newId, title, content, date: '2026-03-18', owner: currentUser?.name || '이지원' });
   saveData(); closeModal('memoAddModal'); renderMemos();
   document.getElementById('addMemoTitle').value = '';
   document.getElementById('addMemoContent').value = '';
@@ -1923,7 +3070,8 @@ function addMeetingCheckItem() {
   const container = document.getElementById('meetingCheckItems');
   const div = document.createElement('div');
   div.style.cssText = 'display:flex;gap:8px;margin-bottom:6px;';
-  div.innerHTML = '<input type="text" placeholder="체크사항 내용" style="flex:1;"><select style="padding:8px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:13px;width:80px;"><option>지원</option><option>소영</option><option>슬기</option><option>전체</option></select>';
+  const selectHtml = USERS.map(u => `<option>${u.name}</option>`).join('') + '<option>전체</option>';
+  div.innerHTML = `<input type="text" placeholder="체크사항 내용" style="flex:1;"><select style="padding:8px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:13px;width:100px;">${selectHtml}</select>`;
   container.appendChild(div);
 }
 
@@ -1944,7 +3092,7 @@ function selOption(el, type, value) {
 }
 function selNoticeType(el) {
   el.parentElement.querySelectorAll('.priority-option').forEach(e => { e.style.borderColor='#eee'; e.style.background='#fff'; e.style.color='#333'; });
-  el.style.borderColor='#667eea'; el.style.background='#e0e7ff'; el.style.color='#667eea';
+  el.style.borderColor='#155940'; el.style.background='#d4edda'; el.style.color='#155940';
 }
 
 function filterTasks(input) {
@@ -1997,7 +3145,7 @@ function openDashStatus(type) {
 
   document.getElementById('dashStatusTitle').textContent = title + ` (${items.length}건)`;
   document.getElementById('dashStatusList').innerHTML = items.map(t => {
-    const dotColor = type === 'urgent' ? '#dc2626' : type === 'progress' ? '#f59e0b' : type === 'today' ? '#667eea' : '#22c55e';
+    const dotColor = type === 'urgent' ? '#dc2626' : type === 'progress' ? '#f59e0b' : type === 'today' ? '#155940' : '#2e7d32';
     const tag = t.deadline ? (t.deadline < today ? '마감 지남' : t.deadline.slice(5)) : '';
     const tagCls = t.deadline && t.deadline < today ? 'tag-overdue' : 'tag-deadline';
     return `<div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #f0f0f0;">
@@ -2089,7 +3237,6 @@ document.addEventListener('click', function(e) {
 //  키보드 단축키
 // ═══════════════════════════════════════
 document.addEventListener('keydown', function(e) {
-  // Don't handle when typing in input/textarea
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
     if (e.key === 'Escape') e.target.blur();
     return;
@@ -2109,12 +3256,16 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'n' || e.key === 'N') { e.preventDefault(); openModal('addModal'); return; }
   if (e.key === '?') { document.getElementById('shortcutHint').classList.toggle('show'); return; }
 
-  // Number keys for tab navigation
   const num = parseInt(e.key);
   if (num >= 1 && num <= 9 && num <= tabNames.length) {
     e.preventDefault();
     const tabName = tabNames[num - 1];
-    // Find the correct nav item by matching data-tab attribute
+    const navItem = document.querySelector(`.sidebar .nav-item[data-tab="${tabName}"]`);
+    if (navItem) navTo(tabName, navItem);
+  }
+  if (e.key === '0') {
+    e.preventDefault();
+    const tabName = tabNames[9];
     const navItem = document.querySelector(`.sidebar .nav-item[data-tab="${tabName}"]`);
     if (navItem) navTo(tabName, navItem);
   }
@@ -2127,6 +3278,25 @@ function escapeHtml(str) {
   if (!str) return '';
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
+
+// ═══════════════════════════════════════
+//  초기화
+// ═══════════════════════════════════════
+// Build dynamic UI elements
+buildKanbanToolbar();
+buildTeamToolbar();
+buildCalFilters();
+buildRecurringUserFilter();
+buildAssigneeChips('addTaskAssignees');
+buildAssigneeChips('addMeetingAttendees', USERS.map(u => u.name));
+buildAssigneeChips('addRecurringAssignees');
+
+// Initialize meeting check item select
+const meetingCheckSelect0 = document.getElementById('meetingCheckWho0');
+if (meetingCheckSelect0) buildMeetingWhoSelect(meetingCheckSelect0);
+
+// Restore login page photos on load
+updateLoginPhotos();
 
 </script>
 </body>
