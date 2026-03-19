@@ -798,6 +798,7 @@
       <div class="search-results" id="searchResults"></div>
     </div>
     <div class="header-right">
+      <a href="/manual.html" target="_blank" style="background:#155940;color:#fff;padding:5px 12px;border-radius:8px;font-size:12px;text-decoration:none;font-weight:600;white-space:nowrap;">📖 매뉴얼</a>
       <button class="notif-btn" onclick="toggleNotif()">🔔<span class="notif-badge" id="notifBadge">3</span></button>
       <div class="avatar-sm" id="headerAvatar">지</div>
       <span style="font-size:13px;color:#666;font-weight:500;" id="headerName">이지원</span>
@@ -2884,12 +2885,21 @@ async function initChat() {
   scrollChatToBottom();
 }
 
+function chatFormatText(text) {
+  let html = escapeHtml(text);
+  // URL을 클릭 가능한 링크로 변환
+  html = html.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" style="color:#155940;text-decoration:underline;">$1</a>');
+  // /manual.html 등 상대경로 링크도 변환
+  html = html.replace(/\/manual\.html/g, '<a href="/manual.html" target="_blank" style="color:#155940;text-decoration:underline;">📖 매뉴얼 보기</a>');
+  return html;
+}
+
 function appendChatBubble(role, text) {
   const msgs = document.getElementById('chatMessages');
   const div = document.createElement('div');
   div.className = 'chat-msg ' + role;
-  if (role === 'bot') {
-    div.innerHTML = `<div class="chat-avatar bot-av">🤖</div><div class="chat-bubble">${escapeHtml(text)}</div>`;
+  if (role === 'bot' || role === 'assistant') {
+    div.innerHTML = `<div class="chat-avatar bot-av">🤖</div><div class="chat-bubble">${chatFormatText(text)}</div>`;
   } else {
     const avClass = currentUser ? 'av-' + currentUser.id : '';
     const initial = currentUser ? getUserShortName(currentUser.id) : '?';
