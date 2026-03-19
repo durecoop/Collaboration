@@ -1092,7 +1092,9 @@
     <label>마감일</label><input type="date" id="addTaskDeadline">
     <label>담당 팀원</label>
     <div class="assignee-chips" id="addTaskAssignees"></div>
-    <label>메모</label><textarea id="addTaskMemo" placeholder="참고사항, 진행 내용 등을 적어주세요"></textarea>
+    <label>메모</label>
+    <textarea id="addTaskMemo" placeholder="참고사항, 진행 내용 등을 적어주세요" style="min-height:120px;"></textarea>
+    <button type="button" onclick="aiAssistMemo('addTaskMemo')" style="margin-top:6px;background:linear-gradient(135deg,#155940,#3e6042);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;">🤖 AI 도움 받기</button>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal('addModal')">취소</button>
       <button class="btn-submit" onclick="saveTask()">등록</button>
@@ -1117,6 +1119,7 @@
     </div>
     <label>내용</label>
     <textarea class="notice-content-area" id="addNoticeContent" placeholder="공지 내용을 자세히 입력하세요."></textarea>
+    <button type="button" onclick="aiAssistMemo('addNoticeContent')" style="margin-top:6px;background:linear-gradient(135deg,#155940,#3e6042);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;">🤖 AI 도움 받기</button>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal('noticeAddModal')">취소</button>
       <button class="btn-submit" onclick="saveNotice()">등록</button>
@@ -1154,7 +1157,8 @@
   <div class="modal">
     <h3>📒 메모 작성</h3>
     <label>제목</label><input type="text" id="addMemoTitle" placeholder="메모 제목">
-    <label>내용</label><textarea id="addMemoContent" placeholder="메모 내용을 입력하세요" style="min-height:120px;"></textarea>
+    <label>내용</label><textarea id="addMemoContent" placeholder="메모 내용을 입력하세요" style="min-height:200px;"></textarea>
+    <button type="button" onclick="aiAssistMemo('addMemoContent')" style="margin-top:6px;background:linear-gradient(135deg,#155940,#3e6042);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;">🤖 AI 도움 받기</button>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal('memoAddModal')">취소</button>
       <button class="btn-submit" onclick="saveMemo()">저장</button>
@@ -1772,9 +1776,10 @@ function selectTask(id) {
     <div class="detail-row"><div class="detail-label">메모 히스토리</div><div class="memo-area">${memoHtml}</div></div>
     <div style="margin-top:12px;">
       <label style="font-size:12px;color:#888;font-weight:600;">메모 추가</label>
-      <div style="display:flex;gap:8px;margin-top:4px;">
-        <input type="text" id="taskMemoInput" placeholder="새 메모 입력..." style="flex:1;padding:8px 12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;outline:none;">
-        <button class="btn-submit" onclick="addTaskMemo(${t.id})">추가</button>
+      <textarea id="taskMemoInput" placeholder="새 메모 입력..." style="width:100%;min-height:80px;padding:10px 12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;outline:none;font-family:inherit;resize:vertical;margin-top:4px;"></textarea>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button type="button" onclick="aiAssistMemo('taskMemoInput')" style="background:linear-gradient(135deg,#155940,#3e6042);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;">🤖 AI 도움</button>
+        <button class="btn-submit" onclick="addTaskMemo(${t.id})" style="margin-left:auto;">추가</button>
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
@@ -3119,6 +3124,60 @@ document.addEventListener('keydown', function(e) {
     if (navItem) navTo(tabName, navItem);
   }
 });
+
+// ═══════════════════════════════════════
+//  AI 메모 작성 도우미
+// ═══════════════════════════════════════
+async function aiAssistMemo(textareaId) {
+  const textarea = document.getElementById(textareaId);
+  if (!textarea) return;
+
+  const text = textarea.value.trim();
+  // 맥락 파악
+  let context = '';
+  if (textareaId === 'addTaskMemo') {
+    const title = document.getElementById('addTaskTitle')?.value || '';
+    context = '업무 등록 메모. 업무 제목: ' + title;
+  } else if (textareaId === 'taskMemoInput') {
+    const taskTitle = document.querySelector('#taskDetailPanel h3')?.textContent || '';
+    context = '업무 진행 메모. 업무: ' + taskTitle;
+  } else if (textareaId === 'addMemoContent') {
+    const title = document.getElementById('addMemoTitle')?.value || '';
+    context = '개인 메모. 제목: ' + title;
+  } else if (textareaId === 'addNoticeContent') {
+    const title = document.getElementById('addNoticeTitle')?.value || '';
+    context = '공지사항 작성. 제목: ' + title;
+  }
+
+  if (!text && !context) {
+    alert('내용을 입력하거나 제목을 먼저 작성해주세요.');
+    return;
+  }
+
+  // 버튼 상태 변경
+  const btn = textarea.parentElement.querySelector('[onclick*="aiAssistMemo"]') ||
+              textarea.nextElementSibling?.querySelector?.('[onclick*="aiAssistMemo"]') ||
+              event?.target;
+  const origText = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = '⏳ AI 작성 중...'; btn.disabled = true; }
+
+  try {
+    const result = await api.post('/api/chat/assist', {
+      userId: currentUser.id,
+      text,
+      context
+    });
+    if (result.result) {
+      textarea.value = result.result;
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+  } catch(e) {
+    alert('AI 도우미 오류가 발생했습니다.');
+  }
+
+  if (btn) { btn.textContent = origText; btn.disabled = false; }
+}
 
 // ═══════════════════════════════════════
 //  유틸

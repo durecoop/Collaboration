@@ -31,6 +31,52 @@ router.post('/', async (req, res) => {
   }
 });
 
+// POST /api/chat/assist - AI 메모 작성 도우미
+router.post('/assist', async (req, res) => {
+  const { userId, text, context } = req.body;
+  if (!CLAUDE_API_KEY) return res.status(500).json({ error: 'API 키 없음' });
+
+  const user = db.data.users.find(u => u.id === userId);
+  const userName = user ? user.name : '';
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CLAUDE_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        system: `당신은 두레생협 팀의 업무 메모/공지 작성을 도와주는 AI 어시스턴트입니다.
+사용자: ${userName}
+
+규칙:
+- 사용자가 입력한 내용을 기반으로 더 체계적이고 상세한 메모/공지로 다듬어주세요
+- 내용이 비어있으면 맥락(context)을 보고 적절한 초안을 작성해주세요
+- 한국어로 작성하세요
+- 이모지를 적절히 활용해서 가독성을 높이세요
+- 결과만 출력하세요 (설명 없이)`,
+        messages: [{
+          role: 'user',
+          content: text
+            ? `아래 내용을 다듬어주세요:\n\n${text}${context ? '\n\n맥락: ' + context : ''}`
+            : `다음 맥락에 맞는 메모 초안을 작성해주세요:\n\n${context || '일반 업무 메모'}`
+        }]
+      })
+    });
+
+    if (!response.ok) throw new Error('API 오류');
+    const data = await response.json();
+    res.json({ result: data.content[0].text });
+  } catch (e) {
+    console.error('AI Assist 오류:', e.message);
+    res.status(500).json({ error: 'AI 도우미 오류' });
+  }
+});
+
 router.delete('/', (req, res) => {
   const { userId } = req.query;
   if (userId) db.data.chatHistory[userId] = [];
