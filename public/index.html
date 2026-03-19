@@ -2734,7 +2734,7 @@ function toggleChatPanel() {
 
 async function clearChat() {
   if (!confirm('대화 기록을 초기화할까요?')) return;
-  await api.del('/api/chat');
+  await api.del('/api/chat?userId=' + currentUser.id);
   appData.chatHistory = [];
   document.getElementById('chatMessages').innerHTML = '';
   chatInitialized = false;
@@ -2747,7 +2747,7 @@ async function initChat() {
   const msgs = document.getElementById('chatMessages');
 
   try {
-    const history = await api.get('/api/chat');
+    const history = await api.get('/api/chat?userId=' + currentUser.id);
     appData.chatHistory = history || [];
   } catch(e) {
     appData.chatHistory = [];
@@ -2769,7 +2769,7 @@ async function initChat() {
     appendChatBubble('bot', welcomeText);
   } else {
     appData.chatHistory.forEach(msg => {
-      appendChatBubble(msg.role, msg.text);
+      appendChatBubble(msg.role, msg.content);
     });
   }
   scrollChatToBottom();
@@ -2803,14 +2803,8 @@ async function sendChat() {
   scrollChatToBottom();
 
   try {
-    const result = await api.post('/api/chat', { message: text });
-    const response = result.response || result.text || '죄송합니다, 응답을 받지 못했습니다.';
-    appendChatBubble('bot', response);
-    // If the server modified data (e.g., registered a task), reload
-    if (result.dataChanged) {
-      await loadAllData();
-      renderAll();
-    }
+    const result = await api.post('/api/chat', { userId: currentUser.id, message: text });
+    appendChatBubble('bot', result.content || '죄송합니다, 응답을 받지 못했습니다.');
   } catch(e) {
     appendChatBubble('bot', '죄송합니다, 서버와 통신 중 오류가 발생했습니다.');
   }
