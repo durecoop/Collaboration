@@ -309,9 +309,9 @@
     .cal-weekday:last-child { color: #2563eb; }
     .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); }
     .cal-day {
-      min-height: 100px; padding: 6px 8px; border-top: 1px solid #f0f0f0;
+      height: 100px; padding: 6px 8px; border-top: 1px solid #f0f0f0;
       border-right: 1px solid #f0f0f0; cursor: pointer; transition: background 0.15s;
-      position: relative;
+      position: relative; overflow: hidden;
     }
     .cal-day:hover { background: #f9fafb; }
     .cal-day:nth-child(7n) { border-right: none; }
@@ -361,6 +361,21 @@
     .cst-type-leave { background: #c8e6c9; color: #2e7d32; }
     .cst-type-event { background: #ede9fe; color: #7c3aed; }
     .cst-type-promo { background: #fce7f3; color: #db2777; }
+
+    /* ── 캘린더 모드 전환 ── */
+    .cal-mode-toggle { display: flex; background: #f0f0f0; border-radius: 10px; overflow: hidden; margin-left: 12px; }
+    .cal-mode-btn { padding: 7px 16px; font-size: 13px; cursor: pointer; border: none; background: transparent; font-weight: 500; color: #999; }
+    .cal-mode-btn.active { background: #155940; color: #fff; font-weight: 700; }
+    .cal-mode-btn.promo-mode.active { background: #db2777; }
+    .cal-promo-border .calendar { border: 2px solid #fce7f3; }
+    .cal-promo-border .cal-weekdays { background: #fdf2f8; }
+    .cal-promo-border .cal-weekday { color: #db2777; }
+    .cal-promo-border .cal-day.today { background: #fce7f3; }
+    .cal-promo-border .cal-day.today .day-num { background: #db2777; }
+    .cal-promo-border .cal-day.selected { background: #fbcfe8; }
+    .cal-promo-border .cal-detail-panel { border: 1px solid #fce7f3; }
+    .cal-promo-border .cal-sel-add { background: #db2777; }
+    .cal-promo-border .cal-sel-add:hover { background: #be185d; }
 
     /* ── 팀 업무 ── */
     .team-toolbar { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
@@ -920,7 +935,13 @@
                 <button class="cal-nav-btn" onclick="changeCalMonth(1)">▶</button>
               </div>
               <button class="cal-today-btn" onclick="goToday()">오늘</button>
-              <button class="cal-today-btn" onclick="openModal('promoScheduleModal')" style="background:#db2777;">📢 홍보 스케줄</button>
+              <div class="cal-mode-toggle">
+                <button class="cal-mode-btn active" onclick="switchCalMode('all',this)">전체</button>
+                <button class="cal-mode-btn promo-mode" onclick="switchCalMode('promo',this)">📢 홍보</button>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button class="cal-today-btn" id="promoAddBtn" onclick="openModal('promoScheduleModal')" style="background:#db2777;display:none;">+ 홍보 스케줄 등록</button>
             </div>
             <div class="cal-view-toggle">
               <button class="cal-view-btn active" onclick="switchCalView('month',this)">월간</button>
@@ -949,13 +970,15 @@
                   <span id="calSelTitle">날짜를 선택하세요</span>
                   <div style="display:flex;gap:6px;">
                     <button class="cal-sel-add" onclick="openLeaveModal()" style="background:#22c55e;">🌴 연차</button>
-                    <button class="cal-sel-add" onclick="openCalEventModal()">📅 일정</button>
+                    <button class="cal-sel-add" id="calAddBtn" onclick="calMode==='promo'?openModal('promoScheduleModal'):openCalEventModal()">📅 일정</button>
                   </div>
                 </div>
                 <div id="calDetailList"><div class="empty-detail">날짜를 클릭하면 일정이 표시됩니다</div></div>
               </div>
             </div>
           </div>
+
+
         </div>
 
         <!-- ── 5. 팀 업무 ── -->
@@ -2161,7 +2184,9 @@ function switchCalView(view, el) {
 function toggleCalFilter(el) { el.classList.toggle('active'); }
 
 function getCalEvents(dateStr) {
-  return appData.calendarEvents.filter(e => e.date === dateStr);
+  const all = appData.calendarEvents.filter(e => e.date === dateStr);
+  if (calMode === 'promo') return all.filter(e => e.cat === 'promo');
+  return all;
 }
 
 function renderCalendar(year, month) {
@@ -2378,6 +2403,33 @@ function renderWeekView() {
   document.getElementById('weekViewContent').innerHTML = `<div class="week-view" style="background:#fff;border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;">
     <div style="display:grid;grid-template-columns:60px repeat(7,1fr);background:#f9fafb;">${headerHtml}</div>
     <div style="display:grid;grid-template-columns:60px repeat(7,1fr);">${bodyHtml}</div></div>`;
+}
+
+// ── 캘린더 모드 전환 (전체/홍보) ──
+let calMode = 'all';
+
+function switchCalMode(mode, el) {
+  calMode = mode;
+  document.querySelectorAll('.cal-mode-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+
+  const tabCal = document.getElementById('tab-calendar');
+  const promoAddBtn = document.getElementById('promoAddBtn');
+  const filtersEl = document.getElementById('calFilters');
+
+  if (mode === 'promo') {
+    tabCal.classList.add('cal-promo-border');
+    promoAddBtn.style.display = 'inline-block';
+    filtersEl.style.display = 'none';
+  } else {
+    tabCal.classList.remove('cal-promo-border');
+    promoAddBtn.style.display = 'none';
+    filtersEl.style.display = 'flex';
+  }
+
+  renderCalendar(calYear, calMonth);
+  document.getElementById('calSelTitle').textContent = '날짜를 선택하세요';
+  document.getElementById('calDetailList').innerHTML = '<div class="empty-detail">날짜를 클릭하면 일정이 표시됩니다</div>';
 }
 
 // ── 팀 업무 ──
