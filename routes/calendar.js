@@ -13,10 +13,13 @@ router.get('/', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const { date, title, cat, who } = req.body;
+  const { date, title, cat, who, startTime, endTime, location, description } = req.body;
   if (!title || !date) return res.status(400).json({ error: '제목과 날짜가 필요합니다' });
 
-  const event = { id: db.nextId('calendarEvents'), date, title, cat: cat || 'task', who: who || '' };
+  const event = {
+    id: db.nextId('calendarEvents'), date, title, cat: cat || 'task', who: who || '',
+    startTime: startTime || '', endTime: endTime || '', location: location || '', description: description || ''
+  };
   db.data.calendarEvents.push(event);
   db.save();
   res.json(event);
@@ -26,11 +29,15 @@ router.put('/:id', (req, res) => {
   const e = db.data.calendarEvents.find(e => e.id === Number(req.params.id));
   if (!e) return res.status(404).json({ error: '이벤트를 찾을 수 없습니다' });
 
-  const { date, title, cat, who } = req.body;
+  const { date, title, cat, who, startTime, endTime, location, description } = req.body;
   if (date !== undefined) e.date = date;
   if (title !== undefined) e.title = title;
   if (cat !== undefined) e.cat = cat;
   if (who !== undefined) e.who = who;
+  if (startTime !== undefined) e.startTime = startTime;
+  if (endTime !== undefined) e.endTime = endTime;
+  if (location !== undefined) e.location = location;
+  if (description !== undefined) e.description = description;
   db.save();
   res.json(e);
 });
