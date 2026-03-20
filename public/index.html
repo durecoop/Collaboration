@@ -873,6 +873,7 @@
                 <div class="pw-grid" id="pwGrid"></div>
               </div>
               <div class="filter-bar">
+                <button onclick="openModal('addModal')" style="background:#155940;color:#fff;border:none;padding:7px 16px;border-radius:10px;font-size:13px;cursor:pointer;font-weight:600;white-space:nowrap;">+ 새 업무</button>
                 <input class="search-input" placeholder="🔍 업무 검색..." oninput="filterTasks(this)">
                 <div class="filter-chip active" onclick="toggleTaskScope(this,'mine')">내 업무</div>
                 <div class="filter-chip" onclick="toggleTaskScope(this,'team')">팀 전체</div>
@@ -942,7 +943,10 @@
               <div class="cal-detail-panel" id="calDetail">
                 <div class="cal-sel-title">
                   <span id="calSelTitle">날짜를 선택하세요</span>
-                  <button class="cal-sel-add" onclick="openCalEventModal()">+ 일정 추가</button>
+                  <div style="display:flex;gap:6px;">
+                    <button class="cal-sel-add" onclick="openLeaveModal()" style="background:#22c55e;">🌴 연차</button>
+                    <button class="cal-sel-add" onclick="openCalEventModal()">📅 일정</button>
+                  </div>
                 </div>
                 <div id="calDetailList"><div class="empty-detail">날짜를 클릭하면 일정이 표시됩니다</div></div>
               </div>
@@ -1146,11 +1150,10 @@
 <div class="modal-overlay" id="calEventModal">
   <div class="modal" style="max-width:460px;">
     <h3>📅 일정 등록</h3>
-    <label>일정 제목</label><input type="text" id="calEventTitle" placeholder="회식, 연차, 미팅, 행사 등">
+    <label>일정 제목</label><input type="text" id="calEventTitle" placeholder="회식, 미팅, 행사 등">
     <label>분류</label>
     <div class="priority-selector" id="calEventCat">
       <div class="priority-option sel-normal" onclick="selCalCat(this,'meeting')" style="font-size:13px;">🤝 회의</div>
-      <div class="priority-option" onclick="selCalCat(this,'leave')" style="font-size:13px;">🌴 연차</div>
       <div class="priority-option" onclick="selCalCat(this,'event')" style="font-size:13px;">🎉 행사/이벤트</div>
       <div class="priority-option" onclick="selCalCat(this,'task')" style="font-size:13px;">📋 업무</div>
     </div>
@@ -1169,6 +1172,31 @@
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal('calEventModal')">취소</button>
       <button class="btn-submit" onclick="saveCalEvent()">등록</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 연차 등록 모달 ════ -->
+<div class="modal-overlay" id="leaveModal">
+  <div class="modal" style="max-width:420px;">
+    <h3>🌴 연차 등록</h3>
+    <label>연차 종류</label>
+    <div class="priority-selector" id="leaveType">
+      <div class="priority-option sel-normal" onclick="selLeaveType(this,'연차')" style="font-size:13px;">연차</div>
+      <div class="priority-option" onclick="selLeaveType(this,'반차(오전)')" style="font-size:13px;">반차(오전)</div>
+      <div class="priority-option" onclick="selLeaveType(this,'반차(오후)')" style="font-size:13px;">반차(오후)</div>
+    </div>
+    <label>시작일</label>
+    <input type="date" id="leaveStartDate">
+    <label>종료일</label>
+    <input type="date" id="leaveEndDate">
+    <label>사유 (선택)</label>
+    <input type="text" id="leaveReason" placeholder="예: 개인 사유, 병원 방문 등">
+    <label>대상</label>
+    <div class="assignee-chips" id="leaveWho"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('leaveModal')">취소</button>
+      <button class="btn-submit" onclick="saveLeave()" style="background:#22c55e;">등록</button>
     </div>
   </div>
 </div>
@@ -2231,6 +2259,54 @@ async function saveCalEvent() {
   const d = new Date(date);
   selectCalDay(d.getDate(), d.getMonth(), d.getFullYear(), date);
   // 내 주간 일정도 갱신
+  renderPW();
+}
+
+// ── 연차 등록 ──
+let selectedLeaveType = '연차';
+function selLeaveType(el, type) {
+  selectedLeaveType = type;
+  el.parentElement.querySelectorAll('.priority-option').forEach(e => { e.className = 'priority-option'; e.style.borderColor='#eee'; e.style.background='#fff'; e.style.color='#333'; });
+  el.classList.add('sel-normal');
+  el.style.borderColor='#155940'; el.style.background='#d4edda'; el.style.color='#155940';
+}
+
+function openLeaveModal() {
+  selectedLeaveType = '연차';
+  document.getElementById('leaveStartDate').value = selectedCalDate || getToday();
+  document.getElementById('leaveEndDate').value = selectedCalDate || getToday();
+  document.getElementById('leaveReason').value = '';
+  document.querySelectorAll('#leaveType .priority-option').forEach(e => { e.className = 'priority-option'; e.style.borderColor='#eee'; e.style.background='#fff'; e.style.color='#333'; });
+  const first = document.querySelector('#leaveType .priority-option');
+  if (first) { first.classList.add('sel-normal'); first.style.borderColor='#155940'; first.style.background='#d4edda'; first.style.color='#155940'; }
+  buildAssigneeChips('leaveWho', [currentUser?.name]);
+  openModal('leaveModal');
+}
+
+async function saveLeave() {
+  const startDate = document.getElementById('leaveStartDate').value;
+  const endDate = document.getElementById('leaveEndDate').value;
+  if (!startDate) return alert('시작일을 선택하세요');
+  if (!endDate) return alert('종료일을 선택하세요');
+  if (endDate < startDate) return alert('종료일이 시작일보다 빠릅니다');
+  const who = [...document.querySelectorAll('#leaveWho .assignee-chip.selected')].map(e => e.textContent).join(', ');
+  const reason = document.getElementById('leaveReason').value.trim();
+  const title = who + ' ' + selectedLeaveType;
+
+  // 시작일~종료일 사이 모든 날짜에 연차 등록
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const dateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    const eventData = { date: dateStr, title, cat: 'leave', who, description: reason };
+    const result = await api.post('/api/calendar', eventData);
+    appData.calendarEvents.push(result);
+  }
+
+  closeModal('leaveModal');
+  renderCalendar(calYear, calMonth);
+  const sd = new Date(startDate);
+  selectCalDay(sd.getDate(), sd.getMonth(), sd.getFullYear(), startDate);
   renderPW();
 }
 
