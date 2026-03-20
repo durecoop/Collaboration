@@ -232,6 +232,15 @@
     .tag-assignee { background: #f3f4f6; color: #666; }
     .tag-memo { background: #ede9fe; color: #7c3aed; }
     .tag-status { background: #dbeafe; color: #2563eb; }
+    .task-actions { display: flex; gap: 4px; align-items: center; flex-shrink: 0; margin-left: auto; }
+    .task-status-btn { font-size: 10px; padding: 3px 8px; border-radius: 10px; border: 1.5px solid #ddd; background: #fff; color: #888; cursor: pointer; white-space: nowrap; }
+    .task-status-btn:hover { border-color: #155940; color: #155940; }
+    .task-status-btn.st-active { background: #155940; color: #fff; border-color: #155940; font-weight: 600; }
+    .task-status-btn.st-progress { background: #3b82f6; color: #fff; border-color: #3b82f6; font-weight: 600; }
+    .task-status-btn.st-done { background: #2e7d32; color: #fff; border-color: #2e7d32; font-weight: 600; }
+    .task-edit-btn { font-size: 13px; padding: 3px 6px; border-radius: 6px; border: none; background: none; cursor: pointer; color: #999; }
+    .task-edit-btn:hover { background: #f0f0f0; color: #3b82f6; }
+    .task-attach-badge { font-size: 10px; background: #f3e8ff; color: #7c3aed; padding: 2px 6px; border-radius: 6px; }
 
     /* ── 업무 상세 패널 ── */
     .detail-panel {
@@ -1103,7 +1112,7 @@
     </div>
     <div class="chat-messages" id="chatMessages"></div>
     <div class="chat-input-area">
-      <input class="chat-input" id="chatInput" placeholder="메시지 입력... (예: '내 업무 뭐 있어?')" onkeydown="if(event.key==='Enter')sendChat()">
+      <input class="chat-input" id="chatInput" placeholder="메시지 입력... (예: '홈페이지 리뉴얼 업무 등록해줘')" onkeydown="if(event.key==='Enter')sendChat()">
       <button class="chat-send-btn" onclick="sendChat()">전송</button>
     </div>
   </div>
@@ -1136,6 +1145,9 @@
     <label>메모</label>
     <textarea id="addTaskMemo" placeholder="참고사항, 진행 내용 등을 적어주세요" style="min-height:120px;"></textarea>
     <button type="button" onclick="aiAssistMemo('addTaskMemo')" style="margin-top:6px;background:linear-gradient(135deg,#155940,#3e6042);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;">🤖 AI 도움 받기</button>
+    <label>첨부파일</label>
+    <input type="file" id="addTaskFiles" multiple style="font-size:13px;">
+    <div id="addTaskFileList" style="margin-top:4px;"></div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal('addModal')">취소</button>
       <button class="btn-submit" onclick="saveTask()">등록</button>
@@ -1166,6 +1178,9 @@
     </div>
     <label>담당 팀원</label>
     <div class="assignee-chips" id="editTaskAssignees"></div>
+    <label>첨부파일</label>
+    <div id="editTaskExistingFiles" style="margin-bottom:6px;"></div>
+    <input type="file" id="editTaskFiles" multiple style="font-size:13px;">
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal('editModal')">취소</button>
       <button class="btn-submit" onclick="updateTask()">저장</button>
@@ -1459,6 +1474,8 @@
 
 <!-- 우클릭 메뉴 -->
 <div class="context-menu" id="contextMenu">
+  <div class="ctx-item" onclick="ctxAction('edit')">✏️ 수정</div>
+  <div class="ctx-divider"></div>
   <div class="ctx-item" onclick="ctxAction('progress')">🔄 진행중으로 변경</div>
   <div class="ctx-item" onclick="ctxAction('done')">✅ 완료로 변경</div>
   <div class="ctx-item" onclick="ctxAction('todo')">📋 시작전으로 변경</div>
@@ -1931,11 +1948,17 @@ function renderTaskCard(t) {
   }
   if (t.assignees.length) metaHtml += `<span class="meta-tag tag-assignee">👤 ${t.assignees.join(', ')}</span>`;
   if (t.memos.length) metaHtml += `<span class="meta-tag tag-memo">📝 ${t.memos.length}</span>`;
-  metaHtml += `<span class="meta-tag tag-status">${t.status}</span>`;
+  if (t.attachments && t.attachments.length) metaHtml += `<span class="meta-tag task-attach-badge">📎 ${t.attachments.length}</span>`;
+
+  const stBtn = (label, val, cls) => `<button class="task-status-btn ${t.status === val ? cls : ''}" onclick="event.stopPropagation();quickStatus(${t.id},'${val}')">${label}</button>`;
 
   return `<div class="task-card ${border} ${checkedCard}" onclick="selectTask(${t.id})" oncontextmenu="showContextMenu(event,${t.id})">
     <div class="task-check ${checked}" onclick="event.stopPropagation();toggleTaskStatus(${t.id})"></div>
     <div class="task-info"><div class="task-title">${t.title}</div><div class="task-meta">${metaHtml}</div></div>
+    <div class="task-actions">
+      ${stBtn('시작전','시작전','st-active')}${stBtn('진행중','진행중','st-progress')}${stBtn('완료','완료','st-done')}
+      <button class="task-edit-btn" onclick="event.stopPropagation();openEditModal(${t.id})" title="수정">✏️</button>
+    </div>
   </div>`;
 }
 
@@ -1982,6 +2005,7 @@ function selectTask(id) {
     </div>
     <div class="detail-row"><div class="detail-label">마감일</div><div class="detail-value" style="${dlStyle}">${dlText}</div></div>
     <div class="detail-row"><div class="detail-label">담당</div><div class="detail-value">${assigneeHtml}</div></div>
+    ${renderAttachmentsDetail(t)}
     <div class="detail-divider"></div>
     <div class="detail-row"><div class="detail-label">메모 히스토리</div><div class="memo-area">${memoHtml}</div></div>
     <div style="margin-top:12px;">
@@ -2019,6 +2043,67 @@ async function changeTaskStatus(id, newStatus) {
   }
 }
 
+async function quickStatus(id, newStatus) {
+  const t = appData.tasks.find(t => t.id === id);
+  if (!t || t.status === newStatus) return;
+  await api.patch('/api/tasks/' + id + '/status', { status: newStatus });
+  t.status = newStatus;
+  renderAll();
+  if (selectedTaskId === id) selectTask(id);
+}
+
+// ── 첨부파일 ──
+async function uploadTaskFiles(taskId, fileInput) {
+  if (!fileInput || !fileInput.files.length) return [];
+  const formData = new FormData();
+  for (const f of fileInput.files) formData.append('files', f);
+  const res = await fetch('/api/tasks/' + taskId + '/attachments', { method: 'POST', body: formData });
+  return await res.json();
+}
+
+function renderAttachmentsDetail(t) {
+  if (!t.attachments || !t.attachments.length) return '';
+  let html = '<div class="detail-row"><div class="detail-label">첨부파일</div><div class="detail-value" style="display:flex;flex-direction:column;gap:4px;">';
+  t.attachments.forEach((a, i) => {
+    const isImg = /\.(jpg|jpeg|png|gif|webp)$/i.test(a.originalName);
+    html += `<div style="display:flex;align-items:center;gap:8px;">`;
+    html += `<a href="${a.url}" target="_blank" download style="font-size:13px;color:#3b82f6;text-decoration:none;">${isImg ? '🖼️' : '📄'} ${a.originalName}</a>`;
+    html += `<button onclick="event.stopPropagation();deleteAttachment(${t.id},${i})" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:12px;" title="삭제">✕</button>`;
+    html += `</div>`;
+    if (isImg) html += `<img src="${a.url}" style="max-width:200px;max-height:120px;border-radius:8px;margin-top:2px;cursor:pointer;" onclick="window.open('${a.url}','_blank')">`;
+  });
+  html += '</div></div>';
+  return html;
+}
+
+function renderExistingFiles(containerId, task) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (!task.attachments || !task.attachments.length) { el.innerHTML = '<span style="font-size:12px;color:#ccc;">첨부파일 없음</span>'; return; }
+  el.innerHTML = task.attachments.map((a, i) => `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+    <span style="font-size:12px;">📎 ${a.originalName}</span>
+    <button type="button" onclick="markFileForRemoval(this,${i})" style="font-size:11px;background:none;border:none;color:#dc2626;cursor:pointer;">삭제</button>
+  </div>`).join('');
+}
+
+let filesToRemove = [];
+function markFileForRemoval(btn, idx) {
+  btn.parentElement.style.textDecoration = 'line-through';
+  btn.parentElement.style.opacity = '0.4';
+  btn.disabled = true;
+  filesToRemove.push(idx);
+}
+
+async function deleteAttachment(taskId, attachIdx) {
+  if (!confirm('이 첨부파일을 삭제할까요?')) return;
+  const res = await fetch('/api/tasks/' + taskId + '/attachments/' + attachIdx, { method: 'DELETE' });
+  const result = await res.json();
+  const t = appData.tasks.find(t => t.id === taskId);
+  if (t) t.attachments = result.attachments || [];
+  selectTask(taskId);
+  renderTaskList();
+}
+
 function openEditModal(id) {
   const t = appData.tasks.find(t => t.id === id);
   if (!t) return;
@@ -2044,6 +2129,10 @@ function openEditModal(id) {
   });
   // 담당자 세팅
   buildAssigneeChips('editTaskAssignees', t.assignees);
+  // 첨부파일 표시
+  filesToRemove = [];
+  renderExistingFiles('editTaskExistingFiles', t);
+  document.getElementById('editTaskFiles').value = '';
   openModal('editModal');
 }
 
@@ -2062,10 +2151,28 @@ async function updateTask() {
   const assignees = [...document.querySelectorAll('#editTaskAssignees .assignee-chip.selected')].map(e => e.textContent);
 
   const taskData = { title, priority, status, startDate, endDate, deadline: endDate, assignees };
+
+  // 삭제 표시된 기존 첨부파일 제거
+  if (filesToRemove.length) {
+    const sorted = [...filesToRemove].sort((a,b) => b - a);
+    for (const idx of sorted) {
+      await fetch('/api/tasks/' + id + '/attachments/' + idx, { method: 'DELETE' });
+    }
+    filesToRemove = [];
+  }
+
   await api.put('/api/tasks/' + id, taskData);
 
+  // 새 첨부파일 업로드
+  const fileInput = document.getElementById('editTaskFiles');
+  if (fileInput && fileInput.files.length) {
+    await uploadTaskFiles(id, fileInput);
+  }
+
+  // 서버에서 최신 데이터 받기
+  const updated = await api.get('/api/tasks/' + id);
   const t = appData.tasks.find(t => t.id === id);
-  if (t) { Object.assign(t, taskData); }
+  if (t) Object.assign(t, updated);
 
   closeModal('editModal');
   renderAll();
@@ -3290,6 +3397,17 @@ async function sendChat() {
   try {
     const result = await api.post('/api/chat', { userId: currentUser.id, message: text });
     appendChatBubble('bot', result.content || '죄송합니다, 응답을 받지 못했습니다.');
+
+    // AI가 업무를 등록/삭제/상태변경한 경우 데이터 새로고침
+    if (result.actions && result.actions.length > 0) {
+      const hasTaskAction = result.actions.some(a =>
+        ['create_task', 'update_task_status', 'delete_task'].includes(a.tool) && a.result.success
+      );
+      if (hasTaskAction) {
+        appData.tasks = await api.get('/api/tasks');
+        renderAll();
+      }
+    }
   } catch(e) {
     appendChatBubble('bot', '죄송합니다, 서버와 통신 중 오류가 발생했습니다.');
   }
@@ -3316,6 +3434,13 @@ async function saveTask() {
   const taskData = { title, priority, status, startDate, endDate, deadline: endDate, assignees, memos: memo ? [{date: getTodayShort(), text: memo}] : [] };
   const result = await api.post('/api/tasks', taskData);
 
+  // 첨부파일 업로드
+  const fileInput = document.getElementById('addTaskFiles');
+  if (fileInput && fileInput.files.length) {
+    const uploaded = await uploadTaskFiles(result.id, fileInput);
+    result.attachments = uploaded.attachments || [];
+  }
+
   appData.tasks.push(result);
 
   closeModal('addModal');
@@ -3325,6 +3450,7 @@ async function saveTask() {
   document.getElementById('addTaskStartDate').value = '';
   document.getElementById('addTaskEndDate').value = '';
   document.getElementById('addTaskMemo').value = '';
+  document.getElementById('addTaskFiles').value = '';
   document.querySelectorAll('#addTaskAssignees .assignee-chip').forEach(e => e.classList.remove('selected'));
 }
 
@@ -3632,7 +3758,11 @@ async function ctxAction(action) {
   const t = appData.tasks.find(t => t.id === ctxTargetTaskId);
   if (!t) return;
 
-  if (action === 'delete') {
+  if (action === 'edit') {
+    openEditModal(ctxTargetTaskId);
+    ctxTargetTaskId = null;
+    return;
+  } else if (action === 'delete') {
     await api.del('/api/tasks/' + ctxTargetTaskId);
     appData.tasks = appData.tasks.filter(t => t.id !== ctxTargetTaskId);
   } else if (action === 'progress') {
